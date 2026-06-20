@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estudos TCE-PE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F2F4F5;
+    --surface:#FFFFFF;
+    --surface-2:#EAEDEF;
+    --ink:#1E2A35;
+    --ink-soft:#69737E;
+    --ink-faint:#9AA3AC;
+    --line:#E2E6E8;
+    --accent:#0E6B63;
+    --accent-dark:#0A4F49;
+    --accent-soft:#E3F1EF;
+    --gold:#B9842A;
+    --gold-soft:#F6EBD7;
+    --danger:#C0392B;
+    --danger-soft:#FBEAE8;
+    --radius:9px;
+    --radius-sm:6px;
+    --shadow-card:0 1px 2px rgba(20,30,35,.05),0 4px 14px rgba(20,30,35,.06);
+    --font-display:'Spectral',Georgia,serif;
+    --font-body:'Inter',system-ui,-apple-system,sans-serif;
+    --font-mono:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);font-family:var(--font-body);
+    font-size:12.5px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  }
+  .hidden{display:none !important;}
+  button{font-family:inherit;cursor:pointer;}
+  select,input,textarea{font-family:inherit;font-size:12px;}
+  .mono{font-family:var(--font-mono);font-feature-settings:"tnum" 1;}
+
+  /* ---------- Botões ---------- */
+  .btn{border:1px solid transparent;border-radius:7px;padding:7px 13px;font-size:11.5px;font-weight:600;transition:filter .15s ease,transform .05s ease;}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-primary:disabled{background:var(--surface-2);color:var(--ink-faint);cursor:not-allowed;}
+  .btn-pause{background:var(--gold-soft);color:var(--gold);border-color:rgba(185,132,42,.3);}
+  .btn-pause:hover{background:#F0DFC0;}
+  .btn-pause:disabled{background:var(--surface-2);color:var(--ink-faint);border-color:var(--line);cursor:not-allowed;}
+  .btn-finalizar{background:var(--accent-dark);color:#fff;}
+  .btn-finalizar:hover{filter:brightness(1.15);}
+  .btn-finalizar:disabled{background:var(--surface-2);color:var(--ink-faint);cursor:not-allowed;}
+  .btn-secondary{background:var(--surface);border-color:var(--line);color:var(--ink);}
+  .btn-secondary:hover{background:var(--surface-2);}
+  .btn-icon{background:none;border:1px solid var(--line);border-radius:6px;color:var(--ink-soft);padding:3px 8px;font-size:10.5px;}
+  .btn-icon:hover{border-color:var(--danger);color:var(--danger);}
+
+  /* ---------- Campos de formulário ---------- */
+  .field{margin-bottom:10px;}
+  .field label{display:block;font-size:10px;font-weight:700;margin-bottom:4px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
+  .field input,.field select,.field textarea{
+    width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;
+    font-size:12px;background:var(--surface);color:var(--ink);
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{
+    outline:2px solid var(--accent-soft);border-color:var(--accent);
+  }
+
+  /* ---------- Layout do App ---------- */
+  .app-header{
+    background:var(--surface);border-bottom:1px solid var(--line);border-top:3px solid var(--accent);
+    display:flex;align-items:center;justify-content:space-between;padding:8px 18px;flex-wrap:wrap;gap:8px;
+    position:sticky;top:0;z-index:50;
+  }
+  .header-brand{display:flex;align-items:center;gap:8px;}
+  .seal-mark{width:21px;height:21px;border-radius:50%;border:2px solid var(--accent);position:relative;flex-shrink:0;}
+  .seal-mark::after{content:"";position:absolute;left:50%;top:50%;width:10px;height:1.5px;background:var(--accent);transform:translate(-50%,-50%) rotate(-20deg);}
+  .header-brand h1{font-family:var(--font-display);font-size:13.5px;margin:0;font-weight:700;}
+  .header-brand .eyebrow{font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);}
+  .header-user{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--ink-soft);font-weight:600;}
+  .user-avatar{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);object-fit:cover;}
+
+  /* ---------- Tela de login ---------- */
+  .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .login-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-card);
+    padding:32px 28px;max-width:320px;width:100%;text-align:center;border-top:3px solid var(--accent);
+  }
+  .login-seal{margin:0 auto 14px;}
+  .login-titulo{font-family:var(--font-display);font-size:17px;font-weight:700;margin:0 0 6px;color:var(--ink);}
+  .login-sub{font-size:11.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 20px;}
+  .btn-google{
+    display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+    background:var(--surface);border:1px solid var(--line);color:var(--ink);font-weight:600;font-size:12px;padding:9px 14px;
+  }
+  .btn-google:hover{background:var(--surface-2);}
+  .login-erro{font-size:10.5px;color:var(--danger);margin-top:12px;}
+
+  .app-main{max-width:900px;margin:0 auto;padding:14px 14px 40px;}
+
+  /* ---------- Abas estilo dossiê ---------- */
+  .tab-nav{display:flex;gap:3px;padding-left:2px;}
+  .tab-btn{
+    font-family:var(--font-display);font-weight:600;font-size:12px;
+    background:var(--surface-2);color:var(--ink-soft);border:1px solid var(--line);border-bottom:none;
+    border-radius:7px 7px 0 0;padding:7px 14px;transform:translateY(3px);
+  }
+  .tab-btn.active{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-card);transform:translateY(0);position:relative;z-index:2;}
+  .tab-panel{background:var(--surface);border:1px solid var(--line);border-radius:0 8px 8px 8px;box-shadow:var(--shadow-card);padding:16px;}
+
+  .section-title{font-family:var(--font-display);font-size:12px;font-weight:700;margin:0 0 8px;color:var(--ink);text-transform:uppercase;letter-spacing:.03em;}
+  .form-row{display:flex;gap:9px;flex-wrap:wrap;}
+  .form-row .field{flex:1;min-width:115px;}
+
+  /* ---------- Estatísticas ---------- */
+  .stats-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .stat-card{
+    flex:1;min-width:105px;background:var(--surface);border:1px solid var(--line);
+    border-top:3px solid var(--accent-soft);border-radius:7px;padding:8px 10px;transition:border-top-color .15s;
+  }
+  .stat-card.acento-gold{border-top-color:var(--gold);}
+  .stat-card.acento-accent{border-top-color:var(--accent);}
+  .stat-card.acento-ink{border-top-color:var(--ink-soft);}
+  .stat-card .label{font-size:8.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;font-weight:700;}
+  .stat-card .value{font-family:var(--font-mono);font-feature-settings:"tnum" 1;font-size:16px;font-weight:600;color:var(--ink);margin-top:2px;}
+
+  /* ---------- Calendário de estudos ---------- */
+  .calendario-card{border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:14px;background:var(--surface);}
+  .calendario-meses{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .cal-mes-bloco{min-width:0;}
+  .calendario-titulo{font-family:var(--font-display);font-size:10.5px;font-weight:700;color:var(--ink);text-transform:capitalize;margin-bottom:5px;}
+  .cal-dias-semana{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px;}
+  .cal-dia-semana-lbl{font-size:7px;font-weight:700;text-align:center;color:var(--ink-faint);text-transform:uppercase;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .cal-dia{aspect-ratio:1;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:7.5px;font-weight:600;line-height:1.05;transition:transform .12s;}
+  .cal-dia:not(.cal-vazio):hover{transform:scale(1.18);}
+  .cal-vazio{visibility:hidden;}
+  .cal-tier-0{background:var(--surface-2);color:var(--ink-faint);}
+  .cal-tier-1{background:#CDE8E4;color:var(--accent-dark);}
+  .cal-tier-2{background:#8FCEC5;color:#04332F;}
+  .cal-tier-3{background:var(--accent);color:#fff;}
+  .cal-tier-4{background:var(--accent-dark);color:#fff;}
+  .cal-hoje{outline:2px solid var(--gold);outline-offset:1px;}
+  .cal-dia-min{font-size:6px;opacity:.85;}
+  .calendario-legenda{display:flex;align-items:center;gap:5px;margin-top:10px;font-size:8.5px;color:var(--ink-faint);flex-wrap:wrap;}
+  .legenda-quadro{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:2px;vertical-align:middle;}
+
+  /* ---------- Cronômetro ---------- */
+  .timer-card{background:var(--surface-2);border-radius:var(--radius);padding:10px;text-align:center;margin-bottom:14px;}
+  .timer-display{font-family:var(--font-mono);font-feature-settings:"tnum" 1;font-size:21px;font-weight:600;color:var(--ink);letter-spacing:.01em;}
+  .timer-status{font-size:9px;color:var(--ink-soft);margin-top:1px;text-transform:uppercase;letter-spacing:.05em;height:12px;}
+  .timer-status.rodando{color:var(--accent-dark);}
+  .timer-status.pausado{color:var(--gold);}
+  .timer-controls{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;margin-top:7px;}
+  .timer-controls select{max-width:190px;}
+
+  /* ---------- Resumo por disciplina ---------- */
+  .resumo-row{display:flex;align-items:center;gap:8px;padding:6px 5px;border-bottom:1px solid var(--line);border-radius:5px;transition:background .12s;}
+  .resumo-row:hover{background:var(--surface-2);}
+  .resumo-row:last-child{border-bottom:none;}
+  .resumo-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .resumo-label{flex:0 0 180px;font-size:11px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .resumo-bar-track{flex:1;background:var(--surface-2);border-radius:4px;height:6px;overflow:hidden;}
+  .resumo-bar-fill{height:100%;border-radius:4px;}
+  .resumo-valor{flex:0 0 58px;text-align:right;font-size:10.5px;font-family:var(--font-mono);font-feature-settings:"tnum" 1;color:var(--ink-soft);}
+
+  /* ---------- Gráfico de pizza por disciplina ---------- */
+  .grafico-pizza-card{border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0 14px;background:var(--surface);}
+  .grafico-pizza-titulo{font-family:var(--font-display);font-size:10.5px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;}
+  .grafico-pizza-wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .grafico-pizza-svg{width:108px;height:108px;flex-shrink:0;}
+  .legenda-pizza{flex:1;min-width:140px;display:flex;flex-direction:column;gap:4px;}
+  .legenda-pizza-item{display:flex;align-items:center;gap:6px;font-size:10.5px;}
+  .legenda-pizza-nome{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);}
+  .legenda-pizza-pct{color:var(--ink-soft);font-size:10px;flex-shrink:0;}
+
+  /* ---------- Tabela de registros ---------- */
+  .tabela-wrap{max-height:280px;overflow-y:auto;border:1px solid var(--line);border-radius:7px;margin-top:6px;}
+  table{width:100%;border-collapse:collapse;font-size:11px;}
+  thead th{
+    position:sticky;top:0;background:var(--surface-2);text-align:left;
+    padding:6px 8px;font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;font-weight:700;color:var(--ink-soft);
+  }
+  tbody tr{transition:background .12s;}
+  tbody tr:hover{background:var(--surface-2);}
+  tbody td{padding:6px 8px;border-top:1px solid var(--line);vertical-align:middle;}
+
+  .pill{
+    display:inline-block;background:var(--accent-soft);color:var(--accent-dark);
+    font-size:9.5px;font-weight:700;letter-spacing:.01em;padding:2px 7px;border-radius:18px;
+  }
+
+  /* ---------- Editor de texto formatado ---------- */
+  .rte-toolbar{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:5px;}
+  .rte-btn{width:25px;height:25px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink);font-size:10px;line-height:1;}
+  .rte-btn:hover{background:var(--surface-2);}
+  .rte-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);}
+  .rte-sep{width:1px;height:17px;background:var(--line);margin:0 2px;}
+  .rte-colors{display:flex;align-items:center;gap:4px;}
+  .rte-swatch{width:16px;height:16px;border-radius:50%;border:1px solid var(--line);padding:0;transition:transform .1s;}
+  .rte-swatch:hover{transform:scale(1.18);}
+  .rte-marcadores{display:flex;align-items:center;gap:4px;}
+  .rte-mark{width:16px;height:16px;border-radius:3px;border:1px solid var(--line);padding:0;font-size:8px;color:var(--ink-faint);line-height:1;transition:transform .1s;}
+  .rte-mark:hover{transform:scale(1.18);}
+  .rte-editor{
+    min-height:110px;border:1px solid var(--line);border-radius:6px;padding:10px 11px;
+    font-size:14px;line-height:1.6;background:var(--surface);color:var(--ink);
+  }
+  .rte-editor:focus{outline:2px solid var(--accent-soft);border-color:var(--accent);}
+  .rte-editor:empty::before{content:attr(data-placeholder);color:var(--ink-faint);}
+
+  .barra-disciplina{display:flex;align-items:flex-end;gap:10px;margin-bottom:10px;}
+  .campo-com-acao{display:flex;align-items:center;gap:5px;}
+  .campo-com-acao select{flex:1;min-width:0;}
+  .btn-toggle-form{flex-shrink:0;white-space:nowrap;}
+  .corpo-form-anotacao{border-top:1px dashed var(--line);margin-top:4px;padding-top:12px;}
+
+  .form-row-foto{align-items:center;}
+  .btn-salvar-anotacao{flex-shrink:0;}
+  .foto-preview-wrap{margin-top:6px;display:flex;align-items:flex-end;gap:8px;}
+  #fotoPreview{max-width:100px;border-radius:5px;border:1px solid var(--line);display:block;}
+  .notas-grid{display:flex;flex-direction:column;gap:12px;margin-top:14px;}
+  .empty-state{color:var(--ink-soft);font-size:13px;text-align:center;padding:30px 0;}
+  .empty-inline{color:var(--ink-faint);font-style:italic;}
+
+  /* ---------- Visualização em Sumário (disciplina > assunto > itens) ---------- */
+  #painelAnotacoes{padding:20px;}
+  .sumario-grupo{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;overflow:hidden;background:var(--surface);}
+  .sumario-grupo-header{display:flex;align-items:stretch;background:var(--surface-2);}
+  .sumario-toggle{
+    flex:1;display:flex;align-items:center;gap:8px;min-width:0;background:transparent;border:none;
+    padding:13px 16px;font-family:var(--font-body);font-size:16px;font-weight:700;color:var(--ink);text-align:left;
+  }
+  .sumario-toggle:hover{background:var(--accent-soft);}
+  .sumario-seta{color:var(--accent-dark);font-size:11px;width:1em;}
+  .sumario-titulo{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sumario-contagem{background:var(--accent-soft);color:var(--accent-dark);font-size:11px;font-weight:700;border-radius:18px;padding:2px 9px;font-family:var(--font-mono);font-feature-settings:"tnum" 1;flex-shrink:0;}
+  .sumario-print-btn{flex-shrink:0;background:transparent;border:none;border-left:1px solid var(--line);padding:0 14px;font-size:14px;color:var(--ink-soft);}
+  .sumario-print-btn:hover{background:var(--gold-soft);color:var(--gold);}
+  .sumario-corpo{padding:10px 16px 16px;}
+
+  .assunto-grupo{margin-bottom:4px;}
+  .assunto-grupo:last-child{margin-bottom:0;}
+  .assunto-toggle{
+    width:100%;display:flex;align-items:center;gap:8px;background:transparent;border:none;
+    padding:9px 7px;font-size:13.5px;font-weight:700;color:var(--ink-soft);text-align:left;border-radius:6px;
+  }
+  .assunto-toggle:hover{background:var(--surface-2);}
+  .assunto-seta{font-size:9.5px;width:.9em;color:var(--ink-faint);}
+  .assunto-titulo{flex:1;min-width:0;text-transform:none;}
+  .assunto-contagem{font-size:10.5px;color:var(--ink-faint);font-family:var(--font-mono);font-feature-settings:"tnum" 1;}
+  .assunto-lista{list-style:none;margin:4px 0 8px;padding:0 0 0 20px;}
+  .assunto-lista.collapsed{display:none;}
+
+  .sumario-item{
+    display:flex;align-items:flex-start;gap:9px;padding:10px 8px;border-top:1px solid var(--line);
+    border-radius:6px;margin:0 -8px;transition:background .12s,opacity .12s;
+  }
+  .sumario-item:hover{background:var(--surface-2);}
+  .sumario-item:first-child{border-top:none;}
+  .sumario-item.arrastando{opacity:.35;}
+  .drag-handle{cursor:grab;color:var(--ink-faint);font-size:13px;line-height:1.7;flex-shrink:0;user-select:none;}
+  .drag-handle:active{cursor:grabbing;}
+  .sumario-item-conteudo{flex:1;font-size:14.5px;line-height:1.65;min-width:0;}
+  .sumario-item-conteudo ul{margin:5px 0;padding-left:18px;}
+  .sumario-item-link{display:inline-block;margin-top:4px;font-size:11.5px;color:var(--accent-dark);text-decoration:none;border-bottom:1px dotted var(--accent-dark);}
+  .sumario-item-link:hover{color:var(--accent);}
+  .sumario-item-acoes{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+  .sumario-foto-thumb{flex-shrink:0;width:46px;height:46px;object-fit:cover;border-radius:6px;border:1px solid var(--line);cursor:zoom-in;}
+  .mover-col{display:flex;flex-direction:column;gap:2px;}
+  .mover-btn{
+    width:18px;height:15px;padding:0;font-size:7.5px;line-height:1;border:1px solid var(--line);
+    border-radius:3px;background:var(--surface);color:var(--ink-soft);display:flex;align-items:center;justify-content:center;
+  }
+  .mover-btn:hover{background:var(--surface-2);color:var(--ink);}
+  .sumario-del{flex-shrink:0;}
+
+  /* ---------- Lightbox ---------- */
+  .lightbox{position:fixed;inset:0;background:rgba(15,20,24,.88);display:flex;align-items:center;justify-content:center;z-index:80;padding:24px;}
+  .lightbox img{max-width:92vw;max-height:88vh;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.4);}
+  .lightbox-close{position:absolute;top:16px;right:20px;background:none;border:none;color:#fff;font-size:26px;line-height:1;}
+
+  /* ---------- Modais (nova disciplina / novo assunto) ---------- */
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,20,24,.5);display:flex;align-items:center;justify-content:center;z-index:80;padding:18px;}
+  .modal-card{background:var(--surface);border-radius:var(--radius);padding:16px;width:100%;max-width:300px;box-shadow:var(--shadow-card);}
+  .modal-card h3{font-family:var(--font-display);margin:0 0 9px;font-size:12.5px;}
+  .modal-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:10px;}
+
+  /* ---------- Selo de confirmação ---------- */
+  .stamp-toast{
+    position:fixed;bottom:18px;right:18px;background:var(--gold-soft);border:2px solid var(--gold);color:var(--gold);
+    font-weight:700;border-radius:7px;padding:7px 13px;font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;
+    z-index:90;opacity:0;transform:translateY(8px) rotate(-3deg) scale(.9);transition:opacity .25s ease,transform .25s ease;
+  }
+  .stamp-toast.show{opacity:1;transform:translateY(0) rotate(-3deg) scale(1);}
+
+  /* ---------- Impressão / PDF ---------- */
+  #areaImpressao{display:none;}
+  @media print{
+    body > *:not(#areaImpressao){display:none !important;}
+    #areaImpressao{display:block !important;font-family:var(--font-body);color:#000;padding:0;}
+    #areaImpressao h1{font-family:var(--font-display);font-size:19px;margin-bottom:2px;}
+    #areaImpressao h2{font-family:var(--font-display);font-size:13px;margin:14px 0 6px;border-bottom:1px solid #ccc;padding-bottom:3px;}
+    #areaImpressao .impressao-meta{font-size:10.5px;color:#555;margin-bottom:16px;border-bottom:1px solid #ccc;padding-bottom:9px;}
+    #areaImpressao .impressao-item{margin-bottom:14px;page-break-inside:avoid;}
+    #areaImpressao .impressao-data{font-size:9.5px;color:#777;font-family:var(--font-mono);font-feature-settings:"tnum" 1;margin-bottom:3px;}
+    #areaImpressao .impressao-link{font-size:10.5px;color:#555;margin-top:3px;}
+    #areaImpressao .impressao-texto{font-size:12.5px;line-height:1.5;}
+    #areaImpressao .impressao-foto{max-width:100%;max-height:300px;margin-top:6px;border:1px solid #ccc;}
+  }
+
+  @media (max-width:640px){
+    .timer-display{font-size:18px;}
+    .resumo-label{flex:0 0 120px;font-size:10.5px;}
+    .app-main{padding:10px 8px 30px;}
+    .tab-panel{padding:11px;}
+    .header-user{font-size:8.5px;}
+    .calendario-meses{grid-template-columns:1fr;gap:14px;}
+    .form-row-foto{flex-direction:column;align-items:stretch;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="loginScreen" class="screen login-screen">
+  <div class="login-card">
+    <div class="seal-mark login-seal"></div>
+    <h1 class="login-titulo">Estudos TCE-PE</h1>
+    <p class="login-sub">Entre com sua conta Google para acessar seu painel de estudos.</p>
+    <button type="button" id="btnEntrarGoogle" class="btn btn-google">
+      <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/>
+        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.4 18.9 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4c-7.7 0-14.3 4.4-17.7 10.7z"/>
+        <path fill="#4CAF50" d="M24 44c5.3 0 10.2-2 13.9-5.4l-6.4-5.4C29.4 34.7 26.8 36 24 36c-5.3 0-9.7-3.4-11.3-8l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/>
+        <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.4 5.4C40.9 36.6 44 30.9 44 24c0-1.3-.1-2.7-.4-3.5z"/>
+      </svg>
+      Entrar com Google
+    </button>
+    <p id="loginErro" class="login-erro hidden"></p>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="appScreen" class="screen hidden">
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="seal-mark"></div>
+      <div>
+        <h1>Estudos TCE-PE</h1>
+        <div class="eyebrow">Painel pessoal de preparação</div>
+      </div>
+    </div>
+    <div class="header-user">
+      <img id="userAvatar" class="user-avatar hidden" alt="">
+      <span id="userNome"></span>
+      <button type="button" id="btnSair" class="btn-icon" title="Sair da conta">Sair</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="painelHoras">Horas de Estudo</button>
+      <button class="tab-btn" data-tab="painelAnotacoes">Questões &amp; Anotações</button>
+    </nav>
+
+    <!-- ---------- PAINEL: HORAS DE ESTUDO ---------- -->
+    <section class="tab-panel" id="painelHoras">
+      <div class="stats-bar">
+        <div class="stat-card acento-gold"><div class="label">Hoje</div><div class="value" id="statHoje">0min</div></div>
+        <div class="stat-card acento-accent"><div class="label">Esta semana</div><div class="value" id="statSemana">0min</div></div>
+        <div class="stat-card acento-ink"><div class="label">Total geral</div><div class="value" id="statTotal">0min</div></div>
+      </div>
+
+      <h2 class="section-title">Cronômetro</h2>
+      <div class="timer-card">
+        <div class="timer-display mono" id="timerDisplay">00:00:00</div>
+        <div class="timer-status" id="timerStatus"></div>
+        <div class="timer-controls">
+          <select id="timerDisciplina"></select>
+          <button class="btn btn-primary" id="btnIniciarTimer">Iniciar</button>
+          <button class="btn btn-pause" id="btnPausarTimer" disabled>Pausar</button>
+          <button class="btn btn-finalizar" id="btnFinalizarTimer" disabled>Finalizar</button>
+        </div>
+      </div>
+
+      <h2 class="section-title">Registros de estudo</h2>
+      <div id="resumoDisciplinas"></div>
+      <div class="grafico-pizza-card">
+        <div class="grafico-pizza-titulo">Distribuição por disciplina</div>
+        <div id="graficoPizzaWrap" class="grafico-pizza-wrap"></div>
+      </div>
+      <div class="tabela-wrap">
+        <table>
+          <thead>
+            <tr><th>Data</th><th>Disciplina</th><th>Duração</th><th>Tipo</th><th>Observação</th><th></th></tr>
+          </thead>
+          <tbody id="horasTbody"></tbody>
+        </table>
+      </div>
+
+      <h2 class="section-title" style="margin-top:14px;">Calendário de estudos</h2>
+      <div class="calendario-card">
+        <div class="calendario-meses" id="calendarioMeses"></div>
+        <div class="calendario-legenda">
+          <span>Menos</span>
+          <span class="legenda-quadro" style="background:var(--surface-2)"></span>
+          <span class="legenda-quadro" style="background:#CDE8E4"></span>
+          <span class="legenda-quadro" style="background:#8FCEC5"></span>
+          <span class="legenda-quadro" style="background:var(--accent)"></span>
+          <span class="legenda-quadro" style="background:var(--accent-dark)"></span>
+          <span>Mais</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PAINEL: QUESTÕES & ANOTAÇÕES ---------- -->
+    <section class="tab-panel hidden" id="painelAnotacoes">
+      <form id="formAnotacao">
+        <div class="barra-disciplina">
+          <div class="field" style="margin-bottom:0;flex:1;">
+            <label for="anotacaoDisciplina">Disciplina</label>
+            <div class="campo-com-acao">
+              <select id="anotacaoDisciplina"></select>
+              <button type="button" class="btn-icon" id="btnRemoverDisciplina" title="Remover esta disciplina">🗑</button>
+            </div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-toggle-form" id="toggleFormAnotacao">+ Nova anotação</button>
+        </div>
+
+        <div id="corpoFormAnotacao" class="corpo-form-anotacao hidden">
+          <div class="form-row">
+            <div class="field" style="flex:1;">
+              <label for="anotacaoAssunto">Assunto (opcional)</label>
+              <div class="campo-com-acao">
+                <select id="anotacaoAssunto"></select>
+                <button type="button" class="btn-icon" id="btnRemoverAssunto" title="Remover este assunto">🗑</button>
+              </div>
+            </div>
+            <div class="field" style="flex:1;">
+              <label for="anotacaoLink">Link da questão (opcional)</label>
+              <input type="url" id="anotacaoLink" placeholder="https://...">
+            </div>
+          </div>
+          <div class="field">
+          <label for="anotacaoTexto">Anotação</label>
+          <div class="rte-toolbar">
+            <button type="button" class="rte-btn" data-cmd="bold" title="Negrito"><b>N</b></button>
+            <button type="button" class="rte-btn" data-cmd="italic" title="Itálico"><i>I</i></button>
+            <button type="button" class="rte-btn" data-cmd="underline" title="Sublinhado"><u>S</u></button>
+            <span class="rte-sep"></span>
+            <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Lista com marcadores">•—</button>
+            <span class="rte-sep"></span>
+            <div class="rte-colors">
+              <button type="button" class="rte-swatch" data-color="#1E2A35" style="background:#1E2A35" title="Preto"></button>
+              <button type="button" class="rte-swatch" data-color="#DC2626" style="background:#DC2626" title="Vermelho"></button>
+              <button type="button" class="rte-swatch" data-color="#EA580C" style="background:#EA580C" title="Laranja"></button>
+              <button type="button" class="rte-swatch" data-color="#B9842A" style="background:#B9842A" title="Amarelo dourado"></button>
+              <button type="button" class="rte-swatch" data-color="#16A34A" style="background:#16A34A" title="Verde"></button>
+              <button type="button" class="rte-swatch" data-color="#2563EB" style="background:#2563EB" title="Azul"></button>
+              <button type="button" class="rte-swatch" data-color="#7C3AED" style="background:#7C3AED" title="Roxo"></button>
+              <button type="button" class="rte-swatch" data-color="#DB2777" style="background:#DB2777" title="Rosa"></button>
+              <button type="button" class="rte-swatch" data-color="#5C6B78" style="background:#5C6B78" title="Cinza"></button>
+            </div>
+            <span class="rte-sep"></span>
+            <div class="rte-marcadores">
+              <button type="button" class="rte-mark" data-bg="#FDE68A" style="background:#FDE68A" title="Marcador amarelo"></button>
+              <button type="button" class="rte-mark" data-bg="#BBF7D0" style="background:#BBF7D0" title="Marcador verde"></button>
+              <button type="button" class="rte-mark" data-bg="#FBCFE8" style="background:#FBCFE8" title="Marcador rosa"></button>
+              <button type="button" class="rte-mark" data-bg="#BFDBFE" style="background:#BFDBFE" title="Marcador azul"></button>
+              <button type="button" class="rte-mark" data-bg="transparent" title="Remover marcador">✕</button>
+            </div>
+          </div>
+          <div id="anotacaoTexto" class="rte-editor" contenteditable="true" data-placeholder="Escreva aqui o seu comentário sobre a questão..."></div>
+        </div>
+        <div class="field">
+          <label for="fotoInput">Foto da questão (opcional)</label>
+          <div class="form-row form-row-foto">
+            <input type="file" id="fotoInput" accept="image/*" style="flex:1;min-width:140px;">
+            <button type="button" id="btnCancelarEdicao" class="btn btn-secondary hidden">Cancelar edição</button>
+            <button type="submit" class="btn btn-primary btn-salvar-anotacao">Salvar anotação</button>
+          </div>
+          <div class="foto-preview-wrap">
+            <img id="fotoPreview" class="hidden" alt="Pré-visualização">
+            <button type="button" id="btnRemoverFoto" class="btn-icon hidden">Remover foto</button>
+          </div>
+        </div>
+        </div>
+      </form>
+
+      <div class="notas-grid" id="anotacoesLista"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ===================== LIGHTBOX ===================== -->
+<div id="lightbox" class="lightbox hidden">
+  <button class="lightbox-close" id="lightboxClose">&times;</button>
+  <img id="lightboxImg" alt="Foto ampliada da questão">
+</div>
+
+<!-- ===================== MODAL NOVA DISCIPLINA ===================== -->
+<div id="disciplineModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h3>Nova disciplina</h3>
+    <div class="field">
+      <label for="novaDisciplinaInput">Nome da disciplina</label>
+      <input type="text" id="novaDisciplinaInput" placeholder="Ex: Direito Eleitoral">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="btnCancelarDisciplina">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmarDisciplina">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL NOVO ASSUNTO ===================== -->
+<div id="assuntoModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h3>Novo assunto</h3>
+    <div class="field">
+      <label for="novoAssuntoInput">Nome do assunto</label>
+      <input type="text" id="novoAssuntoInput" placeholder="Ex: Ativo">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="btnCancelarAssunto">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmarAssunto">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ÁREA DE IMPRESSÃO (PDF) ===================== -->
+<div id="areaImpressao"></div>
+
+<!-- ===================== SELO DE CONFIRMAÇÃO ===================== -->
+<div class="stamp-toast" id="stampToast">✓ Registrado</div>
+
+<script>
+/* =========================================================================
+   Por enquanto este app funciona 100% local (localStorage do navegador).
+   Quando entrarmos na etapa de login, esta seção volta a usar o Firebase.
+   ========================================================================= */
+
+/* ============================ CONSTANTES ============================ */
+const DEFAULT_DISCIPLINAS = [
+  "Jurisprudências Recentes - DOD",
+  "Direito Constitucional",
+  "Direito Administrativo",
+  "Contabilidade Geral",
+  "Contabilidade Pública",
+  "Direito Financeiro/AFO",
+  "Auditoria Governamental",
+  "Controle Externo",
+  "Direito Tributário",
+  "Direito Penal",
+  "Direito Civil",
+  "Direito Processual Civil",
+  "Ciências Atuariais",
+  "Direito Previdenciário - RPPS",
+  "Administração Pública",
+  "Estatística",
+  "Tecnologia da Informação",
+  "Português"
+];
+const TIMER_KEY = "tcepe_timer_ativo";
+const LS_HORAS = "tcepe_horas";
+const LS_ANOTACOES = "tcepe_anotacoes";
+const LS_DISCIPLINAS = "tcepe_disciplinas_custom";
+const LS_DISCIPLINAS_REMOVIDAS = "tcepe_disciplinas_removidas";
+const LS_ASSUNTOS = "tcepe_assuntos_custom";
+const SEM_ASSUNTO = "Sem assunto específico";
+
+function gerarId(){
+  return Date.now().toString(36)+Math.random().toString(36).slice(2,9);
+}
+function carregarDoLocalStorage(chave, padrao){
+  try{
+    const raw = localStorage.getItem(chave);
+    return raw ? JSON.parse(raw) : padrao;
+  } catch(e){
+    console.error("Erro ao ler "+chave+" do localStorage:", e);
+    return padrao;
+  }
+}
+function salvarNoLocalStorage(chave, valor){
+  try{
+    localStorage.setItem(chave, JSON.stringify(valor));
+    return true;
+  } catch(e){
+    console.error("Erro ao salvar "+chave+" no localStorage:", e);
+    alert("Não foi possível salvar: o armazenamento local do navegador pode estar cheio (fotos grandes ocupam bastante espaço).");
+    return false;
+  }
+}
+
+/* ============================== ESTADO =============================== */
+let customDisciplinas = [];
+let disciplinasRemovidas = [];
+let assuntosPorDisciplina = {};
+let horasList = [];
+let anotacoesList = [];
+let activeTimer = null;
+let timerInterval = null;
+let disciplinaCallerSelect = null;
+let disciplinaPrevValue = "";
+let assuntoCallerSelect = null;
+let assuntoPrevValue = "";
+
+/* ============================ UTILITÁRIOS ============================= */
+function pad(n){ return String(n).padStart(2,"0"); }
+
+function formatHMS(totalSegundos){
+  const h = Math.floor(totalSegundos/3600);
+  const m = Math.floor((totalSegundos%3600)/60);
+  const s = Math.floor(totalSegundos%60);
+  return pad(h)+":"+pad(m)+":"+pad(s);
+}
+
+function formatHoraMin(totalSegundos){
+  const h = Math.floor(totalSegundos/3600);
+  const m = Math.round((totalSegundos%3600)/60);
+  if(h>0) return h+"h "+pad(m)+"min";
+  return m+"min";
+}
+
+function formatCompacto(totalSegundos){
+  const h = Math.floor(totalSegundos/3600);
+  const m = Math.round((totalSegundos%3600)/60);
+  if(h>0) return h+"h"+(m>0?pad(m):"");
+  return m+"m";
+}
+
+function formatDateBR(isoDate){
+  if(!isoDate) return "";
+  const partes = isoDate.split("-");
+  return partes[2]+"/"+partes[1]+"/"+partes[0];
+}
+
+function escapeHtml(str){
+  const div = document.createElement("div");
+  div.textContent = str == null ? "" : str;
+  return div.innerHTML;
+}
+
+const RTE_TAGS_PERMITIDAS = new Set(["B","STRONG","I","EM","U","SPAN","BR","DIV","P","UL","OL","LI"]);
+
+function limparEstiloSpan(styleValue){
+  const partes = styleValue.split(";");
+  const limpas = [];
+  partes.forEach(parte=>{
+    const m = parte.match(/^\s*(color|background-color)\s*:\s*(#[0-9a-fA-F]{3,8}|rgb\([0-9,\s]+\))\s*$/i);
+    if(m){ limpas.push(m[1].toLowerCase()+":"+m[2]); }
+  });
+  return limpas.length ? limpas.join(";")+";" : null;
+}
+
+function sanitizeRichText(html){
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = html || "";
+  (function limpar(node){
+    Array.from(node.childNodes).forEach(child=>{
+      if(child.nodeType === Node.TEXT_NODE) return;
+      if(child.nodeType !== Node.ELEMENT_NODE){ node.removeChild(child); return; }
+
+      // Alguns navegadores aplicam cor de texto usando a tag legada <font color="...">
+      // em vez de <span style="color:...">. Convertemos para span antes de filtrar,
+      // senão a tag (e a cor) seria descartada por não estar na lista de tags permitidas.
+      if(child.tagName === "FONT"){
+        const span = document.createElement("SPAN");
+        const cor = child.getAttribute("color");
+        if(cor) span.setAttribute("style", "color:"+cor+";");
+        while(child.firstChild) span.appendChild(child.firstChild);
+        node.replaceChild(span, child);
+        child = span;
+      }
+
+      limpar(child);
+      if(!RTE_TAGS_PERMITIDAS.has(child.tagName)){
+        while(child.firstChild) node.insertBefore(child.firstChild, child);
+        node.removeChild(child);
+        return;
+      }
+      Array.from(child.attributes).forEach(attr=>{
+        if(child.tagName === "SPAN" && attr.name === "style"){
+          const limpo = limparEstiloSpan(attr.value);
+          if(limpo){ child.setAttribute("style", limpo); }
+          else { child.removeAttribute("style"); }
+        } else {
+          child.removeAttribute(attr.name);
+        }
+      });
+    });
+  })(wrapper);
+  return wrapper.innerHTML;
+}
+
+function isHtmlVazio(html){
+  const d = document.createElement("div");
+  d.innerHTML = html || "";
+  return d.textContent.trim().length === 0;
+}
+
+function hojeISO(){
+  return new Date().toISOString().slice(0,10);
+}
+
+function inicioDaSemana(){
+  const agora = new Date();
+  const dia = agora.getDay();
+  const diffParaSegunda = (dia===0 ? 6 : dia-1);
+  const segunda = new Date(agora);
+  segunda.setDate(agora.getDate()-diffParaSegunda);
+  segunda.setHours(0,0,0,0);
+  return segunda;
+}
+
+function getAllDisciplinas(){
+  const conjunto = new Set([...DEFAULT_DISCIPLINAS, ...customDisciplinas]);
+  disciplinasRemovidas.forEach(d=> conjunto.delete(d));
+  return Array.from(conjunto);
+}
+function getAssuntosDe(disciplina){
+  return assuntosPorDisciplina[disciplina] || [];
+}
+
+/* ====================== COR FIXA POR DISCIPLINA ======================== */
+const PALETA_DISCIPLINAS = [
+  "#0E6B63","#2563EB","#DC2626","#EA580C","#B9842A","#16A34A","#7C3AED","#DB2777",
+  "#0891B2","#65A30D","#9333EA","#0D9488","#C2410C","#4338CA","#BE123C","#15803D"
+];
+function hashTexto(str){
+  let hash = 0;
+  for(let i=0;i<str.length;i++){ hash = (hash*31 + str.charCodeAt(i)) | 0; }
+  return Math.abs(hash);
+}
+function corDaDisciplina(disciplina){
+  return PALETA_DISCIPLINAS[hashTexto(disciplina) % PALETA_DISCIPLINAS.length];
+}
+function hexParaRgba(hex, alpha){
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return "rgba("+r+","+g+","+b+","+alpha+")";
+}
+
+function mostrarSeloRegistrado(){
+  const el = document.getElementById("stampToast");
+  el.classList.remove("hidden");
+  el.classList.add("show");
+  clearTimeout(window.__stampTimeout);
+  window.__stampTimeout = setTimeout(()=>{
+    el.classList.remove("show");
+    setTimeout(()=>el.classList.add("hidden"),300);
+  },1600);
+}
+
+/* ====================== DISCIPLINAS / SELECTS ========================= */
+function populateDisciplinaSelect(selectEl, opts){
+  opts = opts || {};
+  const atual = opts.selected || selectEl.value;
+  selectEl.innerHTML = "";
+  if(opts.includeTodas){
+    const o = document.createElement("option");
+    o.value = "__todas__"; o.textContent = "Todas as disciplinas";
+    selectEl.appendChild(o);
+  }
+  getAllDisciplinas().forEach(d=>{
+    const o = document.createElement("option");
+    o.value = d; o.textContent = d;
+    selectEl.appendChild(o);
+  });
+  if(opts.includeAdd){
+    const o = document.createElement("option");
+    o.value = "__add__"; o.textContent = "+ Adicionar nova disciplina...";
+    selectEl.appendChild(o);
+  }
+  const existe = Array.from(selectEl.options).some(o=>o.value===atual);
+  if(atual && existe){ selectEl.value = atual; }
+  selectEl.dataset.prevValue = selectEl.value;
+}
+
+function popularTodosSelects(selecionarNova){
+  populateDisciplinaSelect(document.getElementById("timerDisciplina"), {includeAdd:true});
+  populateDisciplinaSelect(document.getElementById("anotacaoDisciplina"), {includeAdd:true, selected:selecionarNova});
+  atualizarAssuntoSelect();
+}
+
+function carregarDisciplinasCustom(){
+  customDisciplinas = carregarDoLocalStorage(LS_DISCIPLINAS, []);
+  disciplinasRemovidas = carregarDoLocalStorage(LS_DISCIPLINAS_REMOVIDAS, []);
+}
+
+function onDisciplinaSelectChange(selectEl){
+  if(selectEl.value === "__add__"){
+    disciplinaCallerSelect = selectEl;
+    disciplinaPrevValue = selectEl.dataset.prevValue || "";
+    document.getElementById("novaDisciplinaInput").value = "";
+    document.getElementById("disciplineModal").classList.remove("hidden");
+    document.getElementById("novaDisciplinaInput").focus();
+  } else {
+    selectEl.dataset.prevValue = selectEl.value;
+    if(selectEl.id === "anotacaoDisciplina"){
+      atualizarAssuntoSelect();
+      renderAnotacoes();
+    }
+  }
+}
+
+["timerDisciplina","anotacaoDisciplina"].forEach(id=>{
+  document.getElementById(id).addEventListener("change", e=> onDisciplinaSelectChange(e.target));
+});
+
+document.getElementById("btnCancelarDisciplina").addEventListener("click", ()=>{
+  if(disciplinaCallerSelect) disciplinaCallerSelect.value = disciplinaPrevValue;
+  document.getElementById("disciplineModal").classList.add("hidden");
+});
+
+document.getElementById("btnConfirmarDisciplina").addEventListener("click", ()=>{
+  const nome = document.getElementById("novaDisciplinaInput").value.trim();
+  if(!nome) return;
+  const idxRemovida = disciplinasRemovidas.indexOf(nome);
+  if(idxRemovida !== -1){
+    disciplinasRemovidas.splice(idxRemovida, 1);
+    salvarNoLocalStorage(LS_DISCIPLINAS_REMOVIDAS, disciplinasRemovidas);
+  } else if(!getAllDisciplinas().includes(nome)){
+    customDisciplinas.push(nome);
+    salvarNoLocalStorage(LS_DISCIPLINAS, customDisciplinas);
+  }
+  popularTodosSelects(nome);
+  if(disciplinaCallerSelect) disciplinaCallerSelect.value = nome;
+  if(disciplinaCallerSelect && disciplinaCallerSelect.id === "anotacaoDisciplina"){
+    atualizarAssuntoSelect();
+    renderAnotacoes();
+  }
+  document.getElementById("disciplineModal").classList.add("hidden");
+});
+
+function removerDisciplinaAtual(){
+  const sel = document.getElementById("anotacaoDisciplina");
+  const nome = sel.value;
+  if(!nome || nome === "__add__") return;
+  if(getAllDisciplinas().length <= 1){
+    alert("Não é possível remover a última disciplina restante.");
+    return;
+  }
+  const qtdHoras = horasList.filter(h=>h.disciplina === nome).length;
+  const qtdNotas = anotacoesList.filter(a=>a.disciplina === nome).length;
+  let mensagem = 'Remover a disciplina "'+nome+'" das listas de seleção?';
+  if(qtdHoras > 0 || qtdNotas > 0){
+    mensagem += " Ela tem "+qtdHoras+" registro(s) de horas e "+qtdNotas+" anotação(ões) — eles continuam salvos, só não vai dar mais para escolher essa disciplina para algo novo (a menos que adicione de volta).";
+  }
+  if(!confirm(mensagem)) return;
+
+  const idxCustom = customDisciplinas.indexOf(nome);
+  if(idxCustom !== -1){
+    customDisciplinas.splice(idxCustom, 1);
+    salvarNoLocalStorage(LS_DISCIPLINAS, customDisciplinas);
+  } else if(!disciplinasRemovidas.includes(nome)){
+    disciplinasRemovidas.push(nome);
+    salvarNoLocalStorage(LS_DISCIPLINAS_REMOVIDAS, disciplinasRemovidas);
+  }
+  delete assuntosPorDisciplina[nome];
+  salvarNoLocalStorage(LS_ASSUNTOS, assuntosPorDisciplina);
+
+  popularTodosSelects();
+  renderAnotacoes();
+}
+document.getElementById("btnRemoverDisciplina").addEventListener("click", removerDisciplinaAtual);
+
+/* ====================== ASSUNTOS (POR DISCIPLINA) ====================== */
+function carregarAssuntosCustom(){
+  assuntosPorDisciplina = carregarDoLocalStorage(LS_ASSUNTOS, {});
+}
+
+function populateAssuntoSelect(selectEl, disciplina){
+  const atual = selectEl.value;
+  selectEl.innerHTML = "";
+  const optVazio = document.createElement("option");
+  optVazio.value = ""; optVazio.textContent = "(sem assunto específico)";
+  selectEl.appendChild(optVazio);
+  getAssuntosDe(disciplina).forEach(a=>{
+    const o = document.createElement("option");
+    o.value = a; o.textContent = a;
+    selectEl.appendChild(o);
+  });
+  const optAdd = document.createElement("option");
+  optAdd.value = "__add__"; optAdd.textContent = "+ Adicionar assunto...";
+  selectEl.appendChild(optAdd);
+  if(Array.from(selectEl.options).some(o=>o.value===atual)){ selectEl.value = atual; }
+  else { selectEl.value = ""; }
+  selectEl.dataset.prevValue = selectEl.value;
+}
+
+function atualizarAssuntoSelect(){
+  const disciplina = document.getElementById("anotacaoDisciplina").value;
+  populateAssuntoSelect(document.getElementById("anotacaoAssunto"), disciplina);
+}
+
+document.getElementById("toggleFormAnotacao").addEventListener("click", ()=>{
+  const corpo = document.getElementById("corpoFormAnotacao");
+  const aberto = !corpo.classList.contains("hidden");
+  corpo.classList.toggle("hidden", aberto);
+  document.getElementById("toggleFormAnotacao").textContent = aberto ? "+ Nova anotação" : "✕ Fechar";
+  if(aberto && editandoId){
+    sairDoModoEdicao();
+    document.getElementById("anotacaoTexto").innerHTML = "";
+    document.getElementById("anotacaoLink").value = "";
+    limparPreviewFoto();
+  }
+  if(!aberto){ document.getElementById("anotacaoTexto").focus(); }
+});
+
+document.getElementById("anotacaoAssunto").addEventListener("change", e=>{
+  const selectEl = e.target;
+  if(selectEl.value === "__add__"){
+    assuntoCallerSelect = selectEl;
+    assuntoPrevValue = selectEl.dataset.prevValue || "";
+    document.getElementById("novoAssuntoInput").value = "";
+    document.getElementById("assuntoModal").classList.remove("hidden");
+    document.getElementById("novoAssuntoInput").focus();
+  } else {
+    selectEl.dataset.prevValue = selectEl.value;
+  }
+});
+
+document.getElementById("btnCancelarAssunto").addEventListener("click", ()=>{
+  if(assuntoCallerSelect) assuntoCallerSelect.value = assuntoPrevValue;
+  document.getElementById("assuntoModal").classList.add("hidden");
+});
+
+document.getElementById("btnConfirmarAssunto").addEventListener("click", ()=>{
+  const nome = document.getElementById("novoAssuntoInput").value.trim();
+  if(!nome) return;
+  const disciplina = document.getElementById("anotacaoDisciplina").value;
+  if(!assuntosPorDisciplina[disciplina]) assuntosPorDisciplina[disciplina] = [];
+  if(!assuntosPorDisciplina[disciplina].includes(nome)){
+    assuntosPorDisciplina[disciplina].push(nome);
+    salvarNoLocalStorage(LS_ASSUNTOS, assuntosPorDisciplina);
+  }
+  populateAssuntoSelect(document.getElementById("anotacaoAssunto"), disciplina);
+  document.getElementById("anotacaoAssunto").value = nome;
+  document.getElementById("assuntoModal").classList.add("hidden");
+});
+
+function removerAssuntoAtual(){
+  const disciplina = document.getElementById("anotacaoDisciplina").value;
+  const selAssunto = document.getElementById("anotacaoAssunto");
+  const nome = selAssunto.value;
+  if(!nome || nome === "__add__"){
+    alert("Selecione um assunto para remover.");
+    return;
+  }
+  const qtdNotas = anotacoesList.filter(a=>a.disciplina === disciplina && a.assunto === nome).length;
+  let mensagem = 'Remover o assunto "'+nome+'" de '+disciplina+'?';
+  if(qtdNotas > 0){
+    mensagem += " Existem "+qtdNotas+" anotação(ões) escritas nele — elas continuam salvas e visíveis, só não vai dar mais para escolher esse assunto para anotações novas (a menos que adicione de volta).";
+  }
+  if(!confirm(mensagem)) return;
+
+  const lista = assuntosPorDisciplina[disciplina] || [];
+  const idx = lista.indexOf(nome);
+  if(idx !== -1){
+    lista.splice(idx, 1);
+    salvarNoLocalStorage(LS_ASSUNTOS, assuntosPorDisciplina);
+  }
+  populateAssuntoSelect(selAssunto, disciplina);
+}
+document.getElementById("btnRemoverAssunto").addEventListener("click", removerAssuntoAtual);
+
+/* ============================== ABAS ==================================== */
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("painelHoras").classList.add("hidden");
+    document.getElementById("painelAnotacoes").classList.add("hidden");
+    document.getElementById(btn.dataset.tab).classList.remove("hidden");
+  });
+});
+
+/* ============================== TIMER =================================== */
+function atualizarBotoesTimer(){
+  const btnIniciar = document.getElementById("btnIniciarTimer");
+  const btnPausar = document.getElementById("btnPausarTimer");
+  const btnFinalizar = document.getElementById("btnFinalizarTimer");
+  const statusEl = document.getElementById("timerStatus");
+  const selectEl = document.getElementById("timerDisciplina");
+  if(!activeTimer){
+    btnIniciar.disabled = false;
+    btnPausar.disabled = true; btnPausar.textContent = "Pausar";
+    btnFinalizar.disabled = true;
+    selectEl.disabled = false;
+    statusEl.textContent = "";
+    statusEl.className = "timer-status";
+  } else if(activeTimer.pausado){
+    btnIniciar.disabled = true;
+    btnPausar.disabled = false; btnPausar.textContent = "Retomar";
+    btnFinalizar.disabled = false;
+    selectEl.disabled = true;
+    statusEl.textContent = "Pausado";
+    statusEl.className = "timer-status pausado";
+  } else {
+    btnIniciar.disabled = true;
+    btnPausar.disabled = false; btnPausar.textContent = "Pausar";
+    btnFinalizar.disabled = false;
+    selectEl.disabled = true;
+    statusEl.textContent = "Em andamento";
+    statusEl.className = "timer-status rodando";
+  }
+}
+
+function iniciarIntervaloTimer(){
+  atualizarDisplayTimer();
+  timerInterval = setInterval(atualizarDisplayTimer, 1000);
+}
+
+function atualizarDisplayTimer(){
+  if(!activeTimer) return;
+  const segundos = activeTimer.acumulado + (activeTimer.pausado ? 0 : Math.floor((Date.now()-activeTimer.inicioSegmento)/1000));
+  document.getElementById("timerDisplay").textContent = formatHMS(segundos);
+}
+
+document.getElementById("btnIniciarTimer").addEventListener("click", ()=>{
+  const disciplina = document.getElementById("timerDisciplina").value;
+  if(!disciplina || disciplina === "__add__"){
+    alert("Selecione uma disciplina antes de iniciar.");
+    return;
+  }
+  activeTimer = {disciplina: disciplina, acumulado: 0, inicioSegmento: Date.now(), pausado: false};
+  localStorage.setItem(TIMER_KEY, JSON.stringify(activeTimer));
+  iniciarIntervaloTimer();
+  atualizarBotoesTimer();
+});
+
+document.getElementById("btnPausarTimer").addEventListener("click", ()=>{
+  if(!activeTimer) return;
+  if(activeTimer.pausado){
+    activeTimer.inicioSegmento = Date.now();
+    activeTimer.pausado = false;
+    iniciarIntervaloTimer();
+  } else {
+    activeTimer.acumulado += Math.floor((Date.now()-activeTimer.inicioSegmento)/1000);
+    activeTimer.inicioSegmento = null;
+    activeTimer.pausado = true;
+    clearInterval(timerInterval); timerInterval = null;
+    atualizarDisplayTimer();
+  }
+  localStorage.setItem(TIMER_KEY, JSON.stringify(activeTimer));
+  atualizarBotoesTimer();
+});
+
+document.getElementById("btnFinalizarTimer").addEventListener("click", ()=>{
+  if(!activeTimer) return;
+  const segundos = activeTimer.acumulado + (activeTimer.pausado ? 0 : Math.floor((Date.now()-activeTimer.inicioSegmento)/1000));
+  const disciplina = activeTimer.disciplina;
+  const dataISO = hojeISO();
+  clearInterval(timerInterval); timerInterval = null;
+  activeTimer = null;
+  localStorage.removeItem(TIMER_KEY);
+  document.getElementById("timerDisplay").textContent = "00:00:00";
+  atualizarBotoesTimer();
+  if(segundos < 1) return;
+  salvarHora(disciplina, segundos, dataISO, "cronometro", "").then(mostrarSeloRegistrado);
+});
+
+function restaurarTimerSalvo(){
+  const raw = localStorage.getItem(TIMER_KEY);
+  if(!raw) return;
+  try{
+    const salvo = JSON.parse(raw);
+    if(!salvo || !salvo.disciplina) throw new Error("formato inválido");
+    activeTimer = {
+      disciplina: salvo.disciplina,
+      acumulado: salvo.acumulado || 0,
+      inicioSegmento: salvo.pausado ? null : (salvo.inicioSegmento || Date.now()),
+      pausado: !!salvo.pausado
+    };
+    const sel = document.getElementById("timerDisciplina");
+    if(Array.from(sel.options).some(o=>o.value===activeTimer.disciplina)){
+      sel.value = activeTimer.disciplina;
+    }
+    if(!activeTimer.pausado) iniciarIntervaloTimer();
+    else atualizarDisplayTimer();
+    atualizarBotoesTimer();
+  } catch(e){
+    localStorage.removeItem(TIMER_KEY);
+  }
+}
+
+/* ====================== HORAS DE ESTUDO (LOCAL) ===================== */
+function salvarHora(disciplina, duracaoSegundos, data, tipo, observacao){
+  horasList.unshift({
+    id: gerarId(),
+    disciplina: disciplina,
+    duracaoSegundos: duracaoSegundos,
+    data: data,
+    tipo: tipo,
+    observacao: observacao || "",
+    criadoEm: Date.now()
+  });
+  salvarNoLocalStorage(LS_HORAS, horasList);
+  renderHoras();
+  renderCalendario();
+  return Promise.resolve();
+}
+
+function renderEstatisticasTopo(){
+  const hoje = hojeISO();
+  const segundaFeira = inicioDaSemana();
+  let totalHoje = 0, totalSemana = 0, totalGeral = 0;
+  horasList.forEach(h=>{
+    totalGeral += h.duracaoSegundos;
+    if(h.data === hoje) totalHoje += h.duracaoSegundos;
+    if(new Date(h.data+"T00:00:00") >= segundaFeira) totalSemana += h.duracaoSegundos;
+  });
+  document.getElementById("statHoje").textContent = formatHoraMin(totalHoje);
+  document.getElementById("statSemana").textContent = formatHoraMin(totalSemana);
+  document.getElementById("statTotal").textContent = formatHoraMin(totalGeral);
+}
+
+function renderResumo(){
+  const totais = {};
+  horasList.forEach(h=>{
+    totais[h.disciplina] = (totais[h.disciplina] || 0) + h.duracaoSegundos;
+  });
+  const entradas = Object.entries(totais).sort((a,b)=>b[1]-a[1]);
+  const container = document.getElementById("resumoDisciplinas");
+  container.innerHTML = "";
+  if(!entradas.length){
+    container.innerHTML = '<p class="empty-state">Nenhuma hora registrada ainda.</p>';
+    renderGraficoPizza({});
+    return;
+  }
+  const max = entradas[0][1];
+  entradas.forEach(([disciplina,total])=>{
+    const cor = corDaDisciplina(disciplina);
+    const row = document.createElement("div");
+    row.className = "resumo-row";
+    row.innerHTML =
+      '<span class="resumo-dot" style="background:'+cor+'"></span>'+
+      '<span class="resumo-label" title="'+escapeHtml(disciplina)+'">'+escapeHtml(disciplina)+'</span>'+
+      '<div class="resumo-bar-track"><div class="resumo-bar-fill" style="width:'+((total/max)*100).toFixed(1)+'%;background:'+cor+'"></div></div>'+
+      '<span class="resumo-valor mono">'+formatHoraMin(total)+'</span>';
+    container.appendChild(row);
+  });
+  renderGraficoPizza(totais);
+}
+
+function renderGraficoPizza(totais){
+  const container = document.getElementById("graficoPizzaWrap");
+  if(!container) return;
+  const entradas = Object.entries(totais).sort((a,b)=>b[1]-a[1]);
+  const totalGeral = entradas.reduce((soma,[,v])=>soma+v, 0);
+  if(!entradas.length || totalGeral <= 0){
+    container.innerHTML = '<p class="empty-state">Sem dados suficientes para o gráfico ainda.</p>';
+    return;
+  }
+  const raio = 46, centro = 60, espessura = 20;
+  const circunferencia = 2 * Math.PI * raio;
+  let acumulado = 0;
+  const fatias = entradas.map(([disciplina, total])=>{
+    const cor = corDaDisciplina(disciplina);
+    const fracao = total / totalGeral;
+    const comprimento = fracao * circunferencia;
+    const dashoffset = -acumulado;
+    acumulado += comprimento;
+    return '<circle cx="'+centro+'" cy="'+centro+'" r="'+raio+'" fill="none" stroke="'+cor+'" stroke-width="'+espessura+'" '+
+      'stroke-dasharray="'+comprimento.toFixed(2)+' '+(circunferencia-comprimento).toFixed(2)+'" '+
+      'stroke-dashoffset="'+dashoffset.toFixed(2)+'"></circle>';
+  }).join("");
+
+  const legenda = entradas.map(([disciplina,total])=>{
+    const cor = corDaDisciplina(disciplina);
+    const pct = ((total/totalGeral)*100).toFixed(1);
+    return '<div class="legenda-pizza-item">'+
+        '<span class="resumo-dot" style="background:'+cor+'"></span>'+
+        '<span class="legenda-pizza-nome" title="'+escapeHtml(disciplina)+'">'+escapeHtml(disciplina)+'</span>'+
+        '<span class="legenda-pizza-pct mono">'+pct+'%</span>'+
+      '</div>';
+  }).join("");
+
+  container.innerHTML =
+    '<svg viewBox="0 0 120 120" class="grafico-pizza-svg">'+
+      '<g transform="rotate(-90 '+centro+' '+centro+')">'+fatias+'</g>'+
+    '</svg>'+
+    '<div class="legenda-pizza">'+legenda+'</div>';
+}
+
+function renderHoras(){
+  const tbody = document.getElementById("horasTbody");
+  tbody.innerHTML = "";
+  horasList.forEach(h=>{
+    const cor = corDaDisciplina(h.disciplina);
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td class="mono">'+formatDateBR(h.data)+'</td>'+
+      '<td><span class="pill" style="background:'+hexParaRgba(cor,0.14)+';color:'+cor+'">'+escapeHtml(h.disciplina)+'</span></td>'+
+      '<td class="mono">'+formatHoraMin(h.duracaoSegundos)+'</td>'+
+      '<td>'+(h.tipo==="cronometro" ? "Cronômetro" : "Manual")+'</td>'+
+      '<td>'+escapeHtml(h.observacao||"")+'</td>'+
+      '<td><button class="btn-icon" data-del-hora="'+h.id+'">Excluir</button></td>';
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll("[data-del-hora]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if(confirm("Excluir este registro de horas?")){
+        horasList = horasList.filter(h=>h.id !== btn.dataset.delHora);
+        salvarNoLocalStorage(LS_HORAS, horasList);
+        renderHoras();
+        renderCalendario();
+      }
+    });
+  });
+  renderResumo();
+  renderEstatisticasTopo();
+}
+
+/* ====================== CALENDÁRIO DE ESTUDOS ========================= */
+function gerarMapaDiario(){
+  const mapa = {};
+  horasList.forEach(h=>{ mapa[h.data] = (mapa[h.data]||0) + h.duracaoSegundos; });
+  return mapa;
+}
+
+function tierDeSegundos(segundos){
+  if(segundos <= 0) return 0;
+  if(segundos <= 7200) return 1;   // até 2h
+  if(segundos <= 14400) return 2;  // 2h até 4h
+  if(segundos <= 21600) return 3;  // 4h até 6h
+  return 4;                         // acima de 6h
+}
+
+const MESES_CALENDARIO = [5, 6, 7]; // junho, julho, agosto (0-indexado)
+const NOMES_MES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+
+function renderCalendario(){
+  const mapa = gerarMapaDiario();
+  const ano = new Date().getFullYear();
+  const hojeStr = hojeISO();
+  const container = document.getElementById("calendarioMeses");
+  container.innerHTML = "";
+
+  MESES_CALENDARIO.forEach(mes=>{
+    const primeiroDia = new Date(ano, mes, 1);
+    const ultimoDia = new Date(ano, mes+1, 0);
+    const offset = primeiroDia.getDay();
+    const totalDias = ultimoDia.getDate();
+
+    let celulas = "";
+    for(let i=0;i<offset;i++){ celulas += '<div class="cal-dia cal-vazio"></div>'; }
+    for(let d=1; d<=totalDias; d++){
+      const dataISOStr = ano+"-"+pad(mes+1)+"-"+pad(d);
+      const segundos = mapa[dataISOStr] || 0;
+      const tier = tierDeSegundos(segundos);
+      const ehHoje = dataISOStr === hojeStr;
+      const tituloCel = formatDateBR(dataISOStr)+(segundos>0 ? " — "+formatHoraMin(segundos) : " — sem estudo");
+      celulas += '<div class="cal-dia cal-tier-'+tier+(ehHoje?' cal-hoje':'')+'" title="'+tituloCel+'">'+
+        '<span class="cal-dia-num">'+d+'</span>'+
+        (segundos>0 ? '<span class="cal-dia-min">'+formatCompacto(segundos)+'</span>' : '')+
+      '</div>';
+    }
+
+    const bloco = document.createElement("div");
+    bloco.className = "cal-mes-bloco";
+    bloco.innerHTML =
+      '<div class="calendario-titulo">'+NOMES_MES[mes]+'</div>'+
+      '<div class="cal-dias-semana">'+
+        '<span class="cal-dia-semana-lbl">D</span><span class="cal-dia-semana-lbl">S</span><span class="cal-dia-semana-lbl">T</span>'+
+        '<span class="cal-dia-semana-lbl">Q</span><span class="cal-dia-semana-lbl">Q</span><span class="cal-dia-semana-lbl">S</span>'+
+        '<span class="cal-dia-semana-lbl">S</span>'+
+      '</div>'+
+      '<div class="cal-grid">'+celulas+'</div>';
+    container.appendChild(bloco);
+  });
+}
+
+/* ===================== ANOTAÇÕES / QUESTÕES (LOCAL) ================== */
+let editandoId = null;
+let fotoExistenteUrl = null;
+
+function lerArquivoComoDataUrl(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=> resolve(reader.result);
+    reader.onerror = ()=> reject(new Error("Não foi possível ler a foto."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function normalizarLink(valor){
+  const v = (valor || "").trim();
+  if(!v) return "";
+  if(/^javascript:/i.test(v)) return "";
+  if(/^https?:\/\//i.test(v)) return v;
+  return "https://"+v;
+}
+
+async function salvarOuAtualizarAnotacao(disciplina, assunto, texto, link, file){
+  let fotoUrlFinal;
+  if(file){
+    fotoUrlFinal = await lerArquivoComoDataUrl(file);
+  } else {
+    fotoUrlFinal = fotoExistenteUrl || null;
+  }
+
+  if(editandoId){
+    const item = anotacoesList.find(a=>a.id === editandoId);
+    if(!item) throw new Error("Anotação não encontrada (pode ter sido excluída).");
+    item.disciplina = disciplina;
+    item.assunto = assunto || "";
+    item.texto = texto;
+    item.link = link || "";
+    item.fotoUrl = fotoUrlFinal;
+    item.editadoEm = Date.now();
+  } else {
+    anotacoesList.unshift({
+      id: gerarId(),
+      disciplina: disciplina,
+      assunto: assunto || "",
+      texto: texto,
+      link: link || "",
+      fotoUrl: fotoUrlFinal,
+      criadoEm: Date.now()
+    });
+  }
+  if(!salvarNoLocalStorage(LS_ANOTACOES, anotacoesList)){
+    throw new Error("Não foi possível salvar (armazenamento local cheio).");
+  }
+  renderAnotacoes();
+}
+
+function atualizarUiModoEdicao(){
+  const btnSubmit = document.querySelector("#formAnotacao .btn-salvar-anotacao");
+  const btnCancelar = document.getElementById("btnCancelarEdicao");
+  btnSubmit.textContent = editandoId ? "Salvar alterações" : "Salvar anotação";
+  btnCancelar.classList.toggle("hidden", !editandoId);
+}
+
+function sairDoModoEdicao(){
+  editandoId = null;
+  fotoExistenteUrl = null;
+  atualizarUiModoEdicao();
+}
+
+function limparPreviewFoto(){
+  document.getElementById("fotoInput").value = "";
+  document.getElementById("fotoPreview").classList.add("hidden");
+  document.getElementById("btnRemoverFoto").classList.add("hidden");
+}
+
+function iniciarEdicaoAnotacao(id){
+  const item = anotacoesList.find(a=>a.id === id);
+  if(!item) return;
+  editandoId = id;
+  fotoExistenteUrl = item.fotoUrl || null;
+
+  const selDisciplina = document.getElementById("anotacaoDisciplina");
+  if(selDisciplina.value !== item.disciplina){
+    selDisciplina.value = item.disciplina;
+  }
+  populateAssuntoSelect(document.getElementById("anotacaoAssunto"), item.disciplina);
+  document.getElementById("anotacaoAssunto").value = item.assunto || "";
+  document.getElementById("anotacaoTexto").innerHTML = item.texto || "";
+  document.getElementById("anotacaoLink").value = item.link || "";
+
+  if(fotoExistenteUrl){
+    document.getElementById("fotoInput").value = "";
+    document.getElementById("fotoPreview").src = fotoExistenteUrl;
+    document.getElementById("fotoPreview").classList.remove("hidden");
+    document.getElementById("btnRemoverFoto").classList.remove("hidden");
+  } else {
+    limparPreviewFoto();
+  }
+
+  document.getElementById("corpoFormAnotacao").classList.remove("hidden");
+  document.getElementById("toggleFormAnotacao").textContent = "✕ Fechar";
+  atualizarUiModoEdicao();
+  document.getElementById("formAnotacao").scrollIntoView({behavior:"smooth", block:"start"});
+  document.getElementById("anotacaoTexto").focus();
+}
+
+document.getElementById("btnCancelarEdicao").addEventListener("click", ()=>{
+  sairDoModoEdicao();
+  document.getElementById("anotacaoTexto").innerHTML = "";
+  document.getElementById("anotacaoLink").value = "";
+  limparPreviewFoto();
+});
+
+document.getElementById("btnRemoverFoto").addEventListener("click", ()=>{
+  fotoExistenteUrl = null;
+  limparPreviewFoto();
+});
+
+document.getElementById("fotoInput").addEventListener("change", e=>{
+  const file = e.target.files[0];
+  const preview = document.getElementById("fotoPreview");
+  const btnRemover = document.getElementById("btnRemoverFoto");
+  if(file){
+    preview.src = URL.createObjectURL(file);
+    preview.classList.remove("hidden");
+    btnRemover.classList.remove("hidden");
+  } else if(!fotoExistenteUrl){
+    preview.classList.add("hidden");
+    btnRemover.classList.add("hidden");
+  }
+});
+
+document.querySelectorAll(".rte-btn, .rte-swatch, .rte-mark").forEach(btn=>{
+  btn.addEventListener("mousedown", e=> e.preventDefault());
+});
+function focarEditorComEstiloCSS(){
+  const editor = document.getElementById("anotacaoTexto");
+  editor.focus();
+  // Garante que negrito/cor/marcador sejam aplicados com <span style> em vez da tag <font>,
+  // que o sanitizador descarta (era a causa da cor não aparecer depois de salvar).
+  try{ document.execCommand("styleWithCSS", false, true); }catch(e){}
+}
+document.querySelectorAll(".rte-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    focarEditorComEstiloCSS();
+    try{ document.execCommand(btn.dataset.cmd); }catch(e){ console.error(e); }
+    atualizarEstadoToolbar();
+  });
+});
+document.querySelectorAll(".rte-swatch").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    focarEditorComEstiloCSS();
+    try{ document.execCommand("foreColor", false, btn.dataset.color); }catch(e){ console.error(e); }
+  });
+});
+document.querySelectorAll(".rte-mark").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    focarEditorComEstiloCSS();
+    const cor = btn.dataset.bg === "transparent" ? "transparent" : btn.dataset.bg;
+    let aplicou = false;
+    try{ aplicou = document.execCommand("hiliteColor", false, cor); }catch(e){}
+    if(!aplicou){ try{ document.execCommand("backColor", false, cor); }catch(e){ console.error(e); } }
+  });
+});
+document.getElementById("anotacaoTexto").addEventListener("keydown", e=>{
+  if(e.key === "Tab"){
+    e.preventDefault();
+    try{ document.execCommand(e.shiftKey ? "outdent" : "indent"); }catch(err){ console.error(err); }
+  }
+});
+function atualizarEstadoToolbar(){
+  ["bold","italic","underline"].forEach(cmd=>{
+    const btn = document.querySelector('.rte-btn[data-cmd="'+cmd+'"]');
+    if(!btn) return;
+    let ativo = false;
+    try{ ativo = document.queryCommandState(cmd); }catch(e){}
+    btn.classList.toggle("active", ativo);
+  });
+}
+document.addEventListener("selectionchange", ()=>{
+  const editor = document.getElementById("anotacaoTexto");
+  const sel = window.getSelection();
+  if(editor && sel.rangeCount && editor.contains(sel.anchorNode)) atualizarEstadoToolbar();
+});
+
+document.getElementById("formAnotacao").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const disciplina = document.getElementById("anotacaoDisciplina").value;
+  if(disciplina === "__add__") return;
+  const assunto = document.getElementById("anotacaoAssunto").value;
+  if(assunto === "__add__") return;
+  const editorEl = document.getElementById("anotacaoTexto");
+  const texto = isHtmlVazio(editorEl.innerHTML) ? "" : sanitizeRichText(editorEl.innerHTML);
+  const link = normalizarLink(document.getElementById("anotacaoLink").value);
+  const file = document.getElementById("fotoInput").files[0] || null;
+  if(!texto && !file && !fotoExistenteUrl){
+    alert("Escreva uma anotação ou anexe uma foto.");
+    return;
+  }
+  const btnSubmit = e.target.querySelector('button[type="submit"]');
+  btnSubmit.disabled = true;
+  btnSubmit.textContent = "Salvando...";
+  try{
+    await salvarOuAtualizarAnotacao(disciplina, assunto, texto, link, file);
+    editorEl.innerHTML = "";
+    document.getElementById("anotacaoLink").value = "";
+    limparPreviewFoto();
+    sairDoModoEdicao();
+    mostrarSeloRegistrado();
+  } catch(err){
+    alert("Erro ao salvar: "+err.message);
+  } finally {
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = editandoId ? "Salvar alterações" : "Salvar anotação";
+  }
+});
+
+function renderAnotacoes(){
+  const disciplina = document.getElementById("anotacaoDisciplina").value;
+  const lista = (disciplina && disciplina !== "__add__")
+    ? anotacoesList.filter(a=>a.disciplina === disciplina)
+    : [];
+  renderSumarioAnotacoes(lista);
+}
+
+function chaveOrdenacao(a){
+  return (typeof a.ordem === "number") ? a.ordem : -a.criadoEm;
+}
+
+function montarItemSumario(a){
+  const fotoEl = a.fotoUrl
+    ? '<img src="'+a.fotoUrl+'" class="sumario-foto-thumb" data-lightbox="'+a.fotoUrl+'" alt="Foto da questão" title="Clique para ampliar">'
+    : '';
+  const texto = a.texto ? sanitizeRichText(a.texto) : '<span class="empty-inline">(sem texto)</span>';
+  const linkEl = a.link
+    ? '<a class="sumario-item-link" href="'+escapeHtml(a.link)+'" target="_blank" rel="noopener noreferrer">🔗 Ver questão</a>'
+    : '';
+  return '<li class="sumario-item" draggable="true" data-id="'+a.id+'">'+
+      '<span class="drag-handle" title="Arraste para reordenar">⋮⋮</span>'+
+      '<div class="sumario-item-conteudo">'+texto+linkEl+'</div>'+
+      '<div class="sumario-item-acoes">'+
+        fotoEl+
+        '<div class="mover-col">'+
+          '<button type="button" class="mover-btn" data-move="up" data-id="'+a.id+'" title="Mover para cima">▲</button>'+
+          '<button type="button" class="mover-btn" data-move="down" data-id="'+a.id+'" title="Mover para baixo">▼</button>'+
+        '</div>'+
+        '<button type="button" class="btn-icon" data-edit-nota="'+a.id+'" title="Editar">✎ Editar</button>'+
+        '<button type="button" class="btn-icon sumario-del" data-del-nota="'+a.id+'">Excluir</button>'+
+      '</div>'+
+    '</li>';
+}
+
+function renderSumarioAnotacoes(lista){
+  const container = document.getElementById("anotacoesLista");
+  container.innerHTML = "";
+  if(!lista.length){
+    container.innerHTML = '<p class="empty-state">Nenhuma anotação encontrada.</p>';
+    return;
+  }
+  const porDisciplina = {};
+  const ordemDisciplinas = [];
+  lista.forEach(a=>{
+    const d = a.disciplina;
+    const s = a.assunto || SEM_ASSUNTO;
+    if(!porDisciplina[d]){ porDisciplina[d] = {ordem:[], grupos:{}}; ordemDisciplinas.push(d); }
+    if(!porDisciplina[d].grupos[s]){ porDisciplina[d].grupos[s] = []; porDisciplina[d].ordem.push(s); }
+    porDisciplina[d].grupos[s].push(a);
+  });
+  // Ordena os itens de cada grupo pela chave de ordenação manual (ou data de criação, por padrão)
+  ordemDisciplinas.forEach(d=>{
+    porDisciplina[d].ordem.forEach(s=>{
+      porDisciplina[d].grupos[s].sort((a,b)=>chaveOrdenacao(a)-chaveOrdenacao(b));
+    });
+  });
+
+  ordemDisciplinas.forEach(disciplina=>{
+    const info = porDisciplina[disciplina];
+    const totalDisciplina = info.ordem.reduce((soma,s)=>soma+info.grupos[s].length, 0);
+    const usaAssuntos = !(info.ordem.length === 1 && info.ordem[0] === SEM_ASSUNTO);
+
+    let corpoHtml;
+    if(usaAssuntos){
+      corpoHtml = info.ordem.map(assunto=>{
+        const itens = info.grupos[assunto];
+        const itensHtml = itens.map(montarItemSumario).join("");
+        return '<div class="assunto-grupo">'+
+            '<button type="button" class="assunto-toggle" aria-expanded="false">'+
+              '<span class="assunto-seta">▸</span>'+
+              '<span class="assunto-titulo">'+escapeHtml(assunto)+'</span>'+
+              '<span class="assunto-contagem">'+itens.length+'</span>'+
+            '</button>'+
+            '<ul class="assunto-lista collapsed">'+itensHtml+'</ul>'+
+          '</div>';
+      }).join("");
+    } else {
+      corpoHtml = '<ul class="assunto-lista assunto-lista-flat">'+info.grupos[SEM_ASSUNTO].map(montarItemSumario).join("")+'</ul>';
+    }
+
+    const grupoEl = document.createElement("div");
+    grupoEl.className = "sumario-grupo";
+    grupoEl.innerHTML =
+      '<div class="sumario-grupo-header">'+
+        '<button type="button" class="sumario-toggle" aria-expanded="true">'+
+          '<span class="sumario-seta">▾</span>'+
+          '<span class="sumario-titulo">'+escapeHtml(disciplina)+'</span>'+
+          '<span class="sumario-contagem">'+totalDisciplina+'</span>'+
+        '</button>'+
+        '<button type="button" class="sumario-print-btn" data-print-disciplina="'+escapeHtml(disciplina)+'" title="Imprimir / salvar em PDF">🖨️</button>'+
+      '</div>'+
+      '<div class="sumario-corpo">'+corpoHtml+'</div>';
+    container.appendChild(grupoEl);
+  });
+
+  container.querySelectorAll(".sumario-toggle").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const expandido = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", String(!expandido));
+      btn.closest(".sumario-grupo").querySelector(".sumario-corpo").classList.toggle("collapsed", expandido);
+      btn.querySelector(".sumario-seta").textContent = expandido ? "▸" : "▾";
+    });
+  });
+  container.querySelectorAll(".assunto-toggle").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const expandido = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", String(!expandido));
+      btn.closest(".assunto-grupo").querySelector(".assunto-lista").classList.toggle("collapsed", expandido);
+      btn.querySelector(".assunto-seta").textContent = expandido ? "▸" : "▾";
+    });
+  });
+  container.querySelectorAll(".sumario-print-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=> imprimirDisciplina(btn.dataset.printDisciplina));
+  });
+  conectarAcoesDaLista(container);
+  conectarReordenacao(container);
+}
+
+/* ====================== REORDENAÇÃO MANUAL DAS ANOTAÇÕES ================ */
+function obterBucketOrdenado(item){
+  const assunto = item.assunto || "";
+  return anotacoesList
+    .filter(a=>a.disciplina === item.disciplina && (a.assunto||"") === assunto)
+    .sort((a,b)=>chaveOrdenacao(a)-chaveOrdenacao(b));
+}
+
+function aplicarNovaOrdem(itensNaNovaOrdem){
+  itensNaNovaOrdem.forEach((item, idx)=>{ item.ordem = idx; });
+  salvarNoLocalStorage(LS_ANOTACOES, anotacoesList);
+  renderAnotacoes();
+}
+
+function moverAnotacao(id, direcao){
+  const item = anotacoesList.find(a=>a.id === id);
+  if(!item) return;
+  const bucket = obterBucketOrdenado(item);
+  const idx = bucket.findIndex(a=>a.id === id);
+  const novoIdx = idx + direcao;
+  if(idx === -1 || novoIdx < 0 || novoIdx >= bucket.length) return;
+  const temp = bucket[idx];
+  bucket[idx] = bucket[novoIdx];
+  bucket[novoIdx] = temp;
+  aplicarNovaOrdem(bucket);
+}
+
+let arrastandoId = null;
+
+function conectarReordenacao(container){
+  container.querySelectorAll(".mover-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      moverAnotacao(btn.dataset.id, btn.dataset.move === "up" ? -1 : 1);
+    });
+  });
+  container.querySelectorAll(".sumario-item[draggable]").forEach(li=>{
+    li.addEventListener("dragstart", ()=>{
+      arrastandoId = li.dataset.id;
+      li.classList.add("arrastando");
+    });
+    li.addEventListener("dragend", ()=>{
+      li.classList.remove("arrastando");
+      arrastandoId = null;
+    });
+    li.addEventListener("dragover", e=>{ e.preventDefault(); });
+    li.addEventListener("drop", e=>{
+      e.preventDefault();
+      if(!arrastandoId || arrastandoId === li.dataset.id) return;
+      const ul = li.closest(".assunto-lista");
+      const draggedEl = ul ? ul.querySelector('[data-id="'+arrastandoId+'"]') : null;
+      if(!ul || !draggedEl) return;
+      const rect = li.getBoundingClientRect();
+      const depoisDoAlvo = (e.clientY - rect.top) > rect.height/2;
+      if(depoisDoAlvo){ ul.insertBefore(draggedEl, li.nextSibling); }
+      else { ul.insertBefore(draggedEl, li); }
+      const novaSequenciaIds = Array.from(ul.querySelectorAll(".sumario-item")).map(elLi=>elLi.dataset.id);
+      const novaSequencia = novaSequenciaIds.map(id=>anotacoesList.find(a=>a.id===id)).filter(Boolean);
+      aplicarNovaOrdem(novaSequencia);
+    });
+  });
+}
+
+function conectarAcoesDaLista(container){
+  container.querySelectorAll("[data-lightbox]").forEach(el=>{
+    el.addEventListener("click", ()=> abrirLightbox(el.dataset.lightbox));
+  });
+  container.querySelectorAll("[data-edit-nota]").forEach(btn=>{
+    btn.addEventListener("click", ()=> iniciarEdicaoAnotacao(btn.dataset.editNota));
+  });
+  container.querySelectorAll("[data-del-nota]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if(confirm("Excluir esta anotação?")){
+        anotacoesList = anotacoesList.filter(a=>a.id !== btn.dataset.delNota);
+        salvarNoLocalStorage(LS_ANOTACOES, anotacoesList);
+        if(editandoId === btn.dataset.delNota) sairDoModoEdicao();
+        renderAnotacoes();
+      }
+    });
+  });
+}
+
+/* ============================== IMPRESSÃO / PDF ========================= */
+function imprimirDisciplina(disciplina){
+  const itens = anotacoesList.filter(a=>a.disciplina === disciplina);
+  if(!itens.length){
+    alert("Não há anotações nesta disciplina para imprimir.");
+    return;
+  }
+  const grupos = {};
+  const ordem = [];
+  itens.slice().sort((a,b)=>a.criadoEm-b.criadoEm).forEach(a=>{
+    const s = a.assunto || SEM_ASSUNTO;
+    if(!grupos[s]){ grupos[s] = []; ordem.push(s); }
+    grupos[s].push(a);
+  });
+  const usaAssuntos = !(ordem.length === 1 && ordem[0] === SEM_ASSUNTO);
+
+  function montarItemImpresso(a){
+    const texto = a.texto ? '<div class="impressao-texto">'+sanitizeRichText(a.texto)+'</div>' : "";
+    const linkHtml = a.link ? '<div class="impressao-link">Link: '+escapeHtml(a.link)+'</div>' : "";
+    const foto = a.fotoUrl ? '<img class="impressao-foto" src="'+a.fotoUrl+'">' : "";
+    return '<div class="impressao-item">'+
+        '<div class="impressao-data">'+new Date(a.criadoEm).toLocaleDateString("pt-BR")+'</div>'+
+        texto + linkHtml + foto +
+      '</div>';
+  }
+
+  let corpoHtml;
+  if(usaAssuntos){
+    corpoHtml = ordem.map(assunto=>
+      '<h2>'+escapeHtml(assunto)+'</h2>'+grupos[assunto].map(montarItemImpresso).join("")
+    ).join("");
+  } else {
+    corpoHtml = grupos[SEM_ASSUNTO].map(montarItemImpresso).join("");
+  }
+
+  document.getElementById("areaImpressao").innerHTML =
+    "<h1>"+escapeHtml(disciplina)+"</h1>"+
+    '<div class="impressao-meta">Estudos TCE-PE — '+itens.length+' anotação(ões) — gerado em '+new Date().toLocaleString("pt-BR")+'</div>'+
+    corpoHtml;
+  window.print();
+}
+
+/* ============================== LIGHTBOX ================================ */
+function abrirLightbox(url){
+  document.getElementById("lightboxImg").src = url;
+  document.getElementById("lightbox").classList.remove("hidden");
+}
+function fecharLightbox(){
+  document.getElementById("lightbox").classList.add("hidden");
+  document.getElementById("lightboxImg").src = "";
+}
+document.getElementById("lightboxClose").addEventListener("click", fecharLightbox);
+document.getElementById("lightbox").addEventListener("click", e=>{
+  if(e.target.id === "lightbox") fecharLightbox();
+});
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape") fecharLightbox();
+});
+
+/* ============================ INICIALIZAÇÃO ============================ */
+let appJaIniciado = false;
+function iniciarApp(){
+  if(appJaIniciado) return;
+  appJaIniciado = true;
+  carregarDisciplinasCustom();
+  carregarAssuntosCustom();
+  popularTodosSelects();
+  horasList = carregarDoLocalStorage(LS_HORAS, []);
+  anotacoesList = carregarDoLocalStorage(LS_ANOTACOES, []);
+  renderHoras();
+  renderCalendario();
+  renderAnotacoes();
+  restaurarTimerSalvo();
+}
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCbSKzNS9T9x3cs8DLQCdAjyAuUV-nDLlM",
+    authDomain: "projeto-tce-pe.firebaseapp.com",
+    projectId: "projeto-tce-pe",
+    storageBucket: "projeto-tce-pe.firebasestorage.app",
+    messagingSenderId: "822200388036",
+    appId: "1:822200388036:web:1130618fcd3f1577abfc91",
+    measurementId: "G-D7REHQ51JQ"
+  };
+
+  const firebaseApp = initializeApp(firebaseConfig);
+  const auth = getAuth(firebaseApp);
+  const provedorGoogle = new GoogleAuthProvider();
+
+  function mostrarErroLogin(msg){
+    const el = document.getElementById("loginErro");
+    el.textContent = msg;
+    el.classList.remove("hidden");
+  }
+
+  document.getElementById("btnEntrarGoogle").addEventListener("click", async ()=>{
+    document.getElementById("loginErro").classList.add("hidden");
+    try{
+      await signInWithPopup(auth, provedorGoogle);
+    } catch(erro){
+      console.error(erro);
+      if(erro.code === "auth/popup-closed-by-user"){
+        // usuário fechou a janela de login, sem necessidade de mostrar erro
+      } else {
+        mostrarErroLogin("Não foi possível entrar com o Google. Tente novamente em alguns instantes.");
+      }
+    }
+  });
+
+  document.getElementById("btnSair").addEventListener("click", ()=>{
+    signOut(auth);
+  });
+
+  onAuthStateChanged(auth, usuario=>{
+    const loginScreen = document.getElementById("loginScreen");
+    const appScreen = document.getElementById("appScreen");
+    if(usuario){
+      loginScreen.classList.add("hidden");
+      appScreen.classList.remove("hidden");
+      document.getElementById("userNome").textContent = usuario.displayName || usuario.email || "";
+      const avatar = document.getElementById("userAvatar");
+      if(usuario.photoURL){
+        avatar.src = usuario.photoURL;
+        avatar.classList.remove("hidden");
+      } else {
+        avatar.classList.add("hidden");
+      }
+      if(typeof window.iniciarApp === "function") window.iniciarApp();
+    } else {
+      appScreen.classList.add("hidden");
+      loginScreen.classList.remove("hidden");
+    }
+  });
+</script>
+</body>
+</html>
