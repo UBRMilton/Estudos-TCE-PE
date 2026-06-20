@@ -587,11 +587,35 @@ function carregarDoLocalStorage(chave, padrao){
 function salvarNoLocalStorage(chave, valor){
   try{
     localStorage.setItem(chave, JSON.stringify(valor));
+    sincronizarChaveComNuvem(chave, valor);
     return true;
   } catch(e){
     console.error("Erro ao salvar "+chave+" no localStorage:", e);
     alert("Não foi possível salvar: o armazenamento local do navegador pode estar cheio (fotos grandes ocupam bastante espaço).");
     return false;
+  }
+}
+
+function salvarNoLocalStorageSemSincronizar(chave, valor){
+  try{ localStorage.setItem(chave, JSON.stringify(valor)); }
+  catch(e){ console.error("Erro ao salvar cache local de "+chave+":", e); }
+}
+
+// Sempre que horas, anotações ou as configurações de disciplinas/assuntos são salvas
+// localmente, este ponto único também as envia para o Firestore (se o usuário estiver
+// logado e o módulo do Firebase tiver carregado). Centralizar aqui evita ter que repetir
+// essa chamada em cada um dos lugares do código que salvam algo.
+function sincronizarChaveComNuvem(chave, valor){
+  if(chave === LS_HORAS){
+    chamarNuvem("salvarDadoNuvem", "horas", valor);
+  } else if(chave === LS_ANOTACOES){
+    chamarNuvem("salvarDadoNuvem", "anotacoes", valor);
+  } else if(chave === LS_DISCIPLINAS || chave === LS_DISCIPLINAS_REMOVIDAS || chave === LS_ASSUNTOS){
+    chamarNuvem("salvarDadoNuvem", "config", {
+      disciplinasCustom: customDisciplinas,
+      disciplinasRemovidas: disciplinasRemovidas,
+      assuntosPorDisciplina: assuntosPorDisciplina
+    });
   }
 }
 
@@ -1277,6 +1301,7 @@ function renderCalendario(){
 /* ===================== ANOTAÇÕES / QUESTÕES (LOCAL) ================== */
 let editandoId = null;
 let fotoExistenteUrl = null;
+let fotoUrlAoIniciarEdicao = null;
 
 function lerArquivoComoDataUrl(file){
   return new Promise((resolve, reject)=>{
@@ -1286,6 +1311,74 @@ function lerArquivoComoDataUrl(file){
     reader.readAsDataURL(file);
   });
 }
+
+function comprimirImagem(file, larguraMax, qualidade){
+  return new Promise((resolve, reject)=>{
+    lerArquivoComoDataUrl(file).then(dataUrlOriginal=>{
+      let resolvido = false;
+      const resolverUmaVez = valor=>{
+        if(resolvido) return;
+        resolvido = true;
+        resolve(valor);
+      };
+      // Proteção: se por algum motivo o carregamento da imagem nunca disparar
+      // onload/onerror (ex.: navegador sem suporte completo), não trava o salvamento —
+      // após 4s, usa a foto original sem compressão.
+      setTimeout(()=> resolverUmaVez(dataUrlOriginal), 4000);
+
+      const img = new Image();
+      img.onload = ()=>{
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if(!w || !h){ resolverUmaVez(dataUrlOriginal); return; }
+        if(w > larguraMax){
+          h = Math.round(h * (larguraMax / w));
+          w = larguraMax;
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if(!ctx){
+          resolverUmaVez(dataUrlOriginal); // navegador sem suporte a canvas 2D — usa o original
+          return;
+        }
+        ctx.drawImage(img, 0, 0, w, h);
+        try{
+          resolverUmaVez(canvas.toDataURL("image/jpeg", qualidade));
+        } catch(e){
+          resolverUmaVez(dataUrlOriginal); // navegador sem suporte ao canvas (raro) — usa o original
+        }
+      };
+      img.onerror = ()=> resolverUmaVez(dataUrlOriginal); // não é uma imagem processável pelo canvas — usa o original
+      img.src = dataUrlOriginal;
+    }).catch(reject);
+  });
+}
+
+// Comprime a foto e, se a sincronização com a nuvem estiver disponível, envia para o
+// Firebase Storage (retornando a URL); caso contrário, mantém a versão comprimida salva
+// localmente como antes (degradação segura, sem travar o salvamento da anotação).
+async function processarFoto(file){
+  const comprimida = await comprimirImagem(file, 1280, 0.75);
+  if(typeof window.uploadFotoNuvem === "function"){
+    try{
+      return await window.uploadFotoNuvem(comprimida);
+    } catch(e){
+      console.error("Não foi possível enviar a foto para a nuvem; ficará salva só neste navegador.", e);
+      return comprimida;
+    }
+  }
+  return comprimida;
+}
+
+// Chama com segurança uma função exposta pelo módulo do Firebase (se ele tiver carregado
+// com sucesso); se não estiver disponível (ex.: sem internet), simplesmente não faz nada.
+function chamarNuvem(nomeFuncao, ...args){
+  if(typeof window[nomeFuncao] === "function"){
+    try{ window[nomeFuncao](...args); }
+    catch(e){ console.error("Erro de sincronização com a nuvem ("+nomeFuncao+"):", e); }
+  }
+}
+
 
 function normalizarLink(valor){
   const v = (valor || "").trim();
@@ -1298,9 +1391,15 @@ function normalizarLink(valor){
 async function salvarOuAtualizarAnotacao(disciplina, assunto, texto, link, file){
   let fotoUrlFinal;
   if(file){
-    fotoUrlFinal = await lerArquivoComoDataUrl(file);
+    fotoUrlFinal = await processarFoto(file);
   } else {
     fotoUrlFinal = fotoExistenteUrl || null;
+  }
+
+  // Se a foto que estava na anotação antes de começar a edição não é mais a foto final
+  // (foi substituída por outra, ou removida), apaga a antiga da nuvem para não acumular lixo.
+  if(fotoUrlAoIniciarEdicao && fotoUrlAoIniciarEdicao !== fotoUrlFinal && fotoUrlAoIniciarEdicao.indexOf("http") === 0){
+    chamarNuvem("excluirFotoNuvem", fotoUrlAoIniciarEdicao);
   }
 
   if(editandoId){
@@ -1339,6 +1438,7 @@ function atualizarUiModoEdicao(){
 function sairDoModoEdicao(){
   editandoId = null;
   fotoExistenteUrl = null;
+  fotoUrlAoIniciarEdicao = null;
   atualizarUiModoEdicao();
 }
 
@@ -1353,6 +1453,7 @@ function iniciarEdicaoAnotacao(id){
   if(!item) return;
   editandoId = id;
   fotoExistenteUrl = item.fotoUrl || null;
+  fotoUrlAoIniciarEdicao = fotoExistenteUrl;
 
   const selDisciplina = document.getElementById("anotacaoDisciplina");
   if(selDisciplina.value !== item.disciplina){
@@ -1681,6 +1782,10 @@ function conectarAcoesDaLista(container){
   container.querySelectorAll("[data-del-nota]").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       if(confirm("Excluir esta anotação?")){
+        const itemExcluido = anotacoesList.find(a=>a.id === btn.dataset.delNota);
+        if(itemExcluido && itemExcluido.fotoUrl && itemExcluido.fotoUrl.indexOf("http") === 0){
+          chamarNuvem("excluirFotoNuvem", itemExcluido.fotoUrl);
+        }
         anotacoesList = anotacoesList.filter(a=>a.id !== btn.dataset.delNota);
         salvarNoLocalStorage(LS_ANOTACOES, anotacoesList);
         if(editandoId === btn.dataset.delNota) sairDoModoEdicao();
@@ -1764,11 +1869,44 @@ function iniciarApp(){
   renderAnotacoes();
   restaurarTimerSalvo();
 }
+
+/* ======================== DADOS RECEBIDOS DA NUVEM ======================
+   Estas três funções são chamadas pelo módulo do Firebase (script type=module,
+   mais abaixo) sempre que os dados na nuvem mudam — seja por uma alteração feita
+   agora mesmo neste navegador, seja por uma alteração feita em outro dispositivo.
+   Elas atualizam o estado local e re-renderizam a tela, mantendo tudo sincronizado. */
+function aplicarHorasDaNuvem(lista){
+  horasList = Array.isArray(lista) ? lista : [];
+  salvarNoLocalStorageSemSincronizar(LS_HORAS, horasList);
+  renderHoras();
+  renderCalendario();
+}
+function aplicarAnotacoesDaNuvem(lista){
+  anotacoesList = Array.isArray(lista) ? lista : [];
+  salvarNoLocalStorageSemSincronizar(LS_ANOTACOES, anotacoesList);
+  renderAnotacoes();
+}
+function aplicarConfigDaNuvem(config){
+  config = config || {};
+  customDisciplinas = config.disciplinasCustom || [];
+  disciplinasRemovidas = config.disciplinasRemovidas || [];
+  assuntosPorDisciplina = config.assuntosPorDisciplina || {};
+  salvarNoLocalStorageSemSincronizar(LS_DISCIPLINAS, customDisciplinas);
+  salvarNoLocalStorageSemSincronizar(LS_DISCIPLINAS_REMOVIDAS, disciplinasRemovidas);
+  salvarNoLocalStorageSemSincronizar(LS_ASSUNTOS, assuntosPorDisciplina);
+  popularTodosSelects();
+  renderAnotacoes();
+}
+window.aplicarHorasDaNuvem = aplicarHorasDaNuvem;
+window.aplicarAnotacoesDaNuvem = aplicarAnotacoesDaNuvem;
+window.aplicarConfigDaNuvem = aplicarConfigDaNuvem;
 </script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+  import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCbSKzNS9T9x3cs8DLQCdAjyAuUV-nDLlM",
@@ -1782,7 +1920,12 @@ function iniciarApp(){
 
   const firebaseApp = initializeApp(firebaseConfig);
   const auth = getAuth(firebaseApp);
+  const db = getFirestore(firebaseApp);
+  const storage = getStorage(firebaseApp);
   const provedorGoogle = new GoogleAuthProvider();
+
+  let uidAtual = null;
+  let cancelarEscutas = [];
 
   function mostrarErroLogin(msg){
     const el = document.getElementById("loginErro");
@@ -1808,10 +1951,120 @@ function iniciarApp(){
     signOut(auth);
   });
 
-  onAuthStateChanged(auth, usuario=>{
+  /* ---------------------- Referências dos documentos ---------------------- */
+  function refDado(uid, tipo){
+    return doc(db, "usuarios", uid, "dados", tipo);
+  }
+
+  /* ---------------------- Envio de dados para a nuvem ----------------------
+     Chamado pelo script principal (sincronizarChaveComNuvem, dentro de
+     salvarNoLocalStorage) sempre que horas, anotações ou configurações mudam. */
+  window.salvarDadoNuvem = function(tipo, valor){
+    if(!uidAtual) return;
+    setDoc(refDado(uidAtual, tipo), { conteudo: valor, atualizadoEm: Date.now() })
+      .catch(e=> console.error("Erro ao sincronizar '"+tipo+"' com a nuvem:", e));
+  };
+
+  /* ---------------------- Fotos no Firebase Storage ------------------------ */
+  window.uploadFotoNuvem = async function(dataUrlBase64){
+    if(!uidAtual) throw new Error("Usuário não autenticado.");
+    const nomeArquivo = "foto_"+Date.now()+"_"+Math.random().toString(36).slice(2,8)+".jpg";
+    const referencia = ref(storage, "usuarios/"+uidAtual+"/fotos/"+nomeArquivo);
+    await uploadString(referencia, dataUrlBase64, "data_url");
+    return await getDownloadURL(referencia);
+  };
+
+  window.excluirFotoNuvem = async function(urlFoto){
+    try{
+      await deleteObject(ref(storage, urlFoto));
+    } catch(e){
+      console.error("Não foi possível excluir a foto antiga da nuvem (pode já não existir):", e);
+    }
+  };
+
+  /* ------------------ Escuta em tempo real (sincroniza entre dispositivos) ------------------ */
+  function iniciarEscutaNuvem(uid){
+    pararEscutaNuvem();
+    cancelarEscutas.push(onSnapshot(refDado(uid, "horas"), snap=>{
+      const lista = snap.exists() ? (snap.data().conteudo || []) : [];
+      if(typeof window.aplicarHorasDaNuvem === "function") window.aplicarHorasDaNuvem(lista);
+    }, e=> console.error("Erro ao escutar horas na nuvem:", e)));
+
+    cancelarEscutas.push(onSnapshot(refDado(uid, "anotacoes"), snap=>{
+      const lista = snap.exists() ? (snap.data().conteudo || []) : [];
+      if(typeof window.aplicarAnotacoesDaNuvem === "function") window.aplicarAnotacoesDaNuvem(lista);
+    }, e=> console.error("Erro ao escutar anotações na nuvem:", e)));
+
+    cancelarEscutas.push(onSnapshot(refDado(uid, "config"), snap=>{
+      const config = snap.exists() ? (snap.data().conteudo || {}) : {};
+      if(typeof window.aplicarConfigDaNuvem === "function") window.aplicarConfigDaNuvem(config);
+    }, e=> console.error("Erro ao escutar configurações na nuvem:", e)));
+  }
+  function pararEscutaNuvem(){
+    cancelarEscutas.forEach(cancelar=> cancelar());
+    cancelarEscutas = [];
+  }
+
+  /* ------------------------ Migração do navegador para a nuvem ------------------------
+     Roda só uma vez, na primeira vez que este usuário loga e a nuvem ainda está vazia. */
+  async function verificarMigracaoInicial(uid){
+    const snapHoras = await getDoc(refDado(uid, "horas"));
+    if(snapHoras.exists()) return; // já existem dados na nuvem, não é a primeira vez
+
+    let horasLocais, anotacoesLocais, disciplinasCustomLocais, disciplinasRemovidasLocais, assuntosLocais;
+    try{
+      horasLocais = JSON.parse(localStorage.getItem("tcepe_horas") || "[]");
+      anotacoesLocais = JSON.parse(localStorage.getItem("tcepe_anotacoes") || "[]");
+      disciplinasCustomLocais = JSON.parse(localStorage.getItem("tcepe_disciplinas_custom") || "[]");
+      disciplinasRemovidasLocais = JSON.parse(localStorage.getItem("tcepe_disciplinas_removidas") || "[]");
+      assuntosLocais = JSON.parse(localStorage.getItem("tcepe_assuntos_custom") || "{}");
+    } catch(e){
+      console.error("Erro ao ler dados locais para migração:", e);
+      return;
+    }
+
+    const temAlgo = horasLocais.length || anotacoesLocais.length || disciplinasCustomLocais.length ||
+      disciplinasRemovidasLocais.length || Object.keys(assuntosLocais).length;
+    if(!temAlgo) return;
+
+    const querMigrar = confirm(
+      "Encontramos "+horasLocais.length+" registro(s) de horas e "+anotacoesLocais.length+
+      " anotação(ões) salvos neste navegador.\n\nDeseja enviá-los para a nuvem agora?\n\n"+
+      "Clique em Cancelar para começar do zero na nuvem (nada deste navegador será apagado)."
+    );
+    if(!querMigrar) return;
+
+    // Fotos antigas guardadas em base64 precisam subir para o Storage antes de ir para o
+    // Firestore, senão o documento pode ficar grande demais.
+    for(const a of anotacoesLocais){
+      if(a.fotoUrl && a.fotoUrl.indexOf("data:") === 0){
+        try{ a.fotoUrl = await window.uploadFotoNuvem(a.fotoUrl); }
+        catch(e){
+          console.error("Não foi possível migrar a foto de uma anotação:", e);
+          a.fotoUrl = null;
+        }
+      }
+    }
+
+    try{
+      await setDoc(refDado(uid, "horas"), { conteudo: horasLocais, atualizadoEm: Date.now() });
+      await setDoc(refDado(uid, "anotacoes"), { conteudo: anotacoesLocais, atualizadoEm: Date.now() });
+      await setDoc(refDado(uid, "config"), { conteudo: {
+        disciplinasCustom: disciplinasCustomLocais,
+        disciplinasRemovidas: disciplinasRemovidasLocais,
+        assuntosPorDisciplina: assuntosLocais
+      }, atualizadoEm: Date.now() });
+    } catch(e){
+      console.error("Erro ao migrar dados locais para a nuvem:", e);
+      alert("Não foi possível enviar seus dados antigos para a nuvem agora. Eles continuam salvos neste navegador, e podemos tentar de novo depois.");
+    }
+  }
+
+  onAuthStateChanged(auth, async usuario=>{
     const loginScreen = document.getElementById("loginScreen");
     const appScreen = document.getElementById("appScreen");
     if(usuario){
+      uidAtual = usuario.uid;
       loginScreen.classList.add("hidden");
       appScreen.classList.remove("hidden");
       document.getElementById("userNome").textContent = usuario.displayName || usuario.email || "";
@@ -1823,7 +2076,11 @@ function iniciarApp(){
         avatar.classList.add("hidden");
       }
       if(typeof window.iniciarApp === "function") window.iniciarApp();
+      await verificarMigracaoInicial(uidAtual);
+      iniciarEscutaNuvem(uidAtual);
     } else {
+      pararEscutaNuvem();
+      uidAtual = null;
       appScreen.classList.add("hidden");
       loginScreen.classList.remove("hidden");
     }
