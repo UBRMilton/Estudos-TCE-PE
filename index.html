@@ -243,11 +243,14 @@
 
   .assunto-grupo{margin-bottom:4px;}
   .assunto-grupo:last-child{margin-bottom:0;}
+  .assunto-grupo-header{display:flex;align-items:center;gap:2px;}
   .assunto-toggle{
-    width:100%;display:flex;align-items:center;gap:8px;background:transparent;border:none;
+    flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:transparent;border:none;
     padding:9px 7px;font-size:13.5px;font-weight:700;color:var(--ink-soft);text-align:left;border-radius:6px;
   }
   .assunto-toggle:hover{background:var(--surface-2);}
+  .assunto-mover{flex-shrink:0;width:20px;height:20px;padding:0;font-size:9px;}
+  .assunto-mover:disabled{opacity:.3;}
   .assunto-seta{font-size:9.5px;width:.9em;color:var(--ink-faint);}
   .assunto-titulo{flex:1;min-width:0;text-transform:none;}
   .assunto-contagem{font-size:10.5px;color:var(--ink-faint);font-family:var(--font-mono);font-feature-settings:"tnum" 1;}
@@ -1020,6 +1023,22 @@ function removerAssuntoAtual(){
   }
   populateAssuntoSelect(selAssunto, disciplina);
 }
+
+// Troca a posição de um assunto na ordem salva (a mesma usada no select e no sumário),
+// permitindo reordenar os grupos de assunto exibidos nas anotações.
+function moverAssunto(disciplina, assunto, direcao){
+  const lista = assuntosPorDisciplina[disciplina];
+  if(!lista) return;
+  const idx = lista.indexOf(assunto);
+  if(idx === -1) return;
+  const novoIdx = idx + (direcao === "up" ? -1 : 1);
+  if(novoIdx < 0 || novoIdx >= lista.length) return;
+  const temp = lista[idx];
+  lista[idx] = lista[novoIdx];
+  lista[novoIdx] = temp;
+  salvarNoLocalStorage(LS_ASSUNTOS, assuntosPorDisciplina);
+  renderAnotacoes();
+}
 document.getElementById("btnRemoverAssunto").addEventListener("click", removerAssuntoAtual);
 
 /* ============================== ABAS ==================================== */
@@ -1746,6 +1765,16 @@ function renderSumarioAnotacoes(lista){
     if(!porDisciplina[d].grupos[s]){ porDisciplina[d].grupos[s] = []; porDisciplina[d].ordem.push(s); }
     porDisciplina[d].grupos[s].push(a);
   });
+  // Ordena os grupos de assunto conforme a ordem salva em assuntosPorDisciplina (a mesma
+  // usada no select de assuntos) — qualquer assunto sem ordem salva (ex.: um removido da
+  // lista, mas que ainda tem anotações antigas) fica no fim, na ordem em que apareceu.
+  ordemDisciplinas.forEach(d=>{
+    const ordemSalva = assuntosPorDisciplina[d] || [];
+    const presentes = porDisciplina[d].ordem;
+    const ordenado = ordemSalva.filter(s=>presentes.includes(s));
+    presentes.forEach(s=>{ if(!ordenado.includes(s)) ordenado.push(s); });
+    porDisciplina[d].ordem = ordenado;
+  });
   // Ordena os itens de cada grupo pela chave de ordenação manual (ou data de criação, por padrão)
   ordemDisciplinas.forEach(d=>{
     porDisciplina[d].ordem.forEach(s=>{
@@ -1760,15 +1789,25 @@ function renderSumarioAnotacoes(lista){
 
     let corpoHtml;
     if(usaAssuntos){
-      corpoHtml = info.ordem.map(assunto=>{
+      corpoHtml = info.ordem.map((assunto,idx)=>{
         const itens = info.grupos[assunto];
         const itensHtml = itens.map(montarItemSumario).join("");
+        const podeReordenar = (assuntosPorDisciplina[disciplina]||[]).includes(assunto);
+        const setaCima = podeReordenar
+          ? '<button type="button" class="btn-icon assunto-mover" data-mover-assunto-disciplina="'+escapeHtml(disciplina)+'" data-mover-assunto-nome="'+escapeHtml(assunto)+'" data-mover-assunto-dir="up" title="Mover assunto para cima" '+(idx===0?'disabled':'')+'>▲</button>'
+          : '';
+        const setaBaixo = podeReordenar
+          ? '<button type="button" class="btn-icon assunto-mover" data-mover-assunto-disciplina="'+escapeHtml(disciplina)+'" data-mover-assunto-nome="'+escapeHtml(assunto)+'" data-mover-assunto-dir="down" title="Mover assunto para baixo" '+(idx===info.ordem.length-1?'disabled':'')+'>▼</button>'
+          : '';
         return '<div class="assunto-grupo">'+
-            '<button type="button" class="assunto-toggle" aria-expanded="false">'+
-              '<span class="assunto-seta">▸</span>'+
-              '<span class="assunto-titulo">'+escapeHtml(assunto)+'</span>'+
-              '<span class="assunto-contagem">'+itens.length+'</span>'+
-            '</button>'+
+            '<div class="assunto-grupo-header">'+
+              '<button type="button" class="assunto-toggle" aria-expanded="false">'+
+                '<span class="assunto-seta">▸</span>'+
+                '<span class="assunto-titulo">'+escapeHtml(assunto)+'</span>'+
+                '<span class="assunto-contagem">'+itens.length+'</span>'+
+              '</button>'+
+              setaCima+setaBaixo+
+            '</div>'+
             '<ul class="assunto-lista collapsed">'+itensHtml+'</ul>'+
           '</div>';
       }).join("");
@@ -1805,6 +1844,12 @@ function renderSumarioAnotacoes(lista){
       btn.setAttribute("aria-expanded", String(!expandido));
       btn.closest(".assunto-grupo").querySelector(".assunto-lista").classList.toggle("collapsed", expandido);
       btn.querySelector(".assunto-seta").textContent = expandido ? "▸" : "▾";
+    });
+  });
+  container.querySelectorAll(".assunto-mover").forEach(btn=>{
+    btn.addEventListener("click", e=>{
+      e.stopPropagation();
+      moverAssunto(btn.dataset.moverAssuntoDisciplina, btn.dataset.moverAssuntoNome, btn.dataset.moverAssuntoDir);
     });
   });
   container.querySelectorAll(".sumario-print-btn").forEach(btn=>{
