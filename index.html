@@ -206,7 +206,7 @@
   .rte-mark:hover{transform:scale(1.18);}
   .rte-editor{
     min-height:110px;border:1px solid var(--line);border-radius:6px;padding:10px 11px;
-    font-size:14px;line-height:1.6;background:var(--surface);color:var(--ink);
+    font-size:13px;line-height:1.6;background:var(--surface);color:var(--ink);
   }
   .rte-editor:focus{outline:2px solid var(--accent-soft);border-color:var(--accent);}
   .rte-editor:empty::before{content:attr(data-placeholder);color:var(--ink-faint);}
@@ -263,7 +263,7 @@
   .sumario-item.arrastando{opacity:.35;}
   .drag-handle{cursor:grab;color:var(--ink-faint);font-size:13px;line-height:1.7;flex-shrink:0;user-select:none;}
   .drag-handle:active{cursor:grabbing;}
-  .sumario-item-conteudo{flex:1;font-size:14.5px;line-height:1.65;min-width:0;}
+  .sumario-item-conteudo{flex:1;font-size:13px;line-height:1.65;min-width:0;}
   .sumario-item-conteudo ul{margin:5px 0;padding-left:18px;}
   .sumario-item-link{display:inline-block;margin-top:4px;font-size:11.5px;color:var(--accent-dark);text-decoration:none;border-bottom:1px dotted var(--accent-dark);}
   .sumario-item-link:hover{color:var(--accent);}
@@ -449,9 +449,7 @@
             <button type="button" class="rte-btn" data-cmd="italic" title="Itálico"><i>I</i></button>
             <button type="button" class="rte-btn" data-cmd="underline" title="Sublinhado"><u>S</u></button>
             <span class="rte-sep"></span>
-            <button type="button" class="rte-btn" data-fontsize-px="12px" title="Letra um pouco menor (selecione o texto antes)"><span style="font-size:11px">A</span></button>
-            <button type="button" class="rte-btn" data-fontsize-px="10px" title="Letra menor (selecione o texto antes)"><span style="font-size:9.5px">A</span></button>
-            <button type="button" class="rte-btn" data-fontsize-px="9px" title="Letra bem pequena (selecione o texto antes)"><span style="font-size:8.5px">A</span></button>
+            <button type="button" class="rte-btn" data-fontsize-px="10px" title="Diminuir / voltar ao tamanho normal (selecione o texto antes)"><span style="font-size:9.5px">A</span></button>
             <span class="rte-sep"></span>
             <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Lista com marcadores">•—</button>
             <span class="rte-sep"></span>
@@ -1585,27 +1583,49 @@ document.querySelectorAll(".rte-btn[data-cmd]").forEach(btn=>{
 document.querySelectorAll(".rte-btn[data-fontsize-px]").forEach(btn=>{
   btn.addEventListener("click", ()=> aplicarTamanhoFonteSelecao(btn.dataset.fontsizePx));
 });
-// Implementação própria (não usa execCommand("fontSize")): em testes reais, o
-// execCommand combinado com styleWithCSS gerava tamanhos como "x-small"/"large" em vez
-// de um valor em px, e por isso era descartado pelo sanitizador ao salvar. Envolver a
-// seleção manualmente num <span style="font-size:Npx"> evita essa inconsistência.
+// Botão de tamanho de letra funciona como alternador: se o início da seleção já está
+// dentro de um span com esse tamanho reduzido, a ação é desfazer (voltar ao normal);
+// caso contrário, aplica o tamanho reduzido. Usamos execCommand("insertHTML") em ambos
+// os casos para que o navegador registre a mudança no histórico de desfazer (Ctrl+Z).
 function aplicarTamanhoFonteSelecao(px){
   const editor = document.getElementById("anotacaoTexto");
   editor.focus();
-  const selecao = window.getSelection();
-  if(!selecao || selecao.rangeCount === 0 || selecao.isCollapsed || !editor.contains(selecao.anchorNode)){
-    alert("Selecione o trecho de texto que deseja deixar menor antes de clicar nesse botão.");
+  const selecaoInicial = window.getSelection();
+  if(!selecaoInicial || selecaoInicial.rangeCount === 0 || selecaoInicial.isCollapsed || !editor.contains(selecaoInicial.anchorNode)){
+    alert("Selecione o trecho de texto que deseja diminuir (ou voltar ao tamanho normal) antes de clicar nesse botão.");
     return;
   }
-  const range = selecao.getRangeAt(0);
-  const span = document.createElement("span");
-  span.style.fontSize = px;
-  span.appendChild(range.extractContents());
-  range.insertNode(span);
-  selecao.removeAllRanges();
-  const novoRange = document.createRange();
-  novoRange.selectNodeContents(span);
-  selecao.addRange(novoRange);
+
+  function encontrarSpanReduzidoAncestral(node){
+    let atual = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+    while(atual && editor.contains(atual)){
+      if(atual.tagName === "SPAN" && atual.style.fontSize === px) return atual;
+      atual = atual.parentElement;
+    }
+    return null;
+  }
+  const spanAncestral = encontrarSpanReduzidoAncestral(selecaoInicial.anchorNode);
+
+  if(spanAncestral){
+    // Já está reduzido: seleciona o span inteiro e o substitui pelo próprio conteúdo,
+    // removendo só o "envoltório" do tamanho — volta ao tamanho normal.
+    const rangeSpan = document.createRange();
+    rangeSpan.selectNode(spanAncestral);
+    selecaoInicial.removeAllRanges();
+    selecaoInicial.addRange(rangeSpan);
+    try{
+      document.execCommand("insertHTML", false, spanAncestral.innerHTML);
+    }catch(e){ console.error(e); }
+    return;
+  }
+
+  const range = selecaoInicial.getRangeAt(0);
+  const container = document.createElement("div");
+  container.appendChild(range.cloneContents());
+  const novoHtml = '<span style="font-size:'+px+';">'+container.innerHTML+'</span>';
+  try{
+    document.execCommand("insertHTML", false, novoHtml);
+  }catch(e){ console.error(e); }
 }
 document.querySelectorAll(".rte-swatch").forEach(btn=>{
   btn.addEventListener("click", ()=>{
