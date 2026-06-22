@@ -761,7 +761,14 @@ function isHtmlVazio(html){
 }
 
 function hojeISO(){
-  return new Date().toISOString().slice(0,10);
+  // Importante: NÃO usar toISOString() aqui, pois ele converte para UTC e adianta a
+  // virada do dia em fusos atrás de Greenwich (ex.: no Brasil, a partir das 21h o UTC já
+  // mostra o dia seguinte). Usamos os componentes de data locais do dispositivo.
+  const d = new Date();
+  const ano = d.getFullYear();
+  const mes = String(d.getMonth()+1).padStart(2,"0");
+  const dia = String(d.getDate()).padStart(2,"0");
+  return ano+"-"+mes+"-"+dia;
 }
 
 function inicioDaSemana(){
