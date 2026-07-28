@@ -201,7 +201,8 @@
   .rte-colors{display:flex;align-items:center;gap:4px;}
   .rte-swatch{width:16px;height:16px;border-radius:50%;border:1px solid var(--line);padding:0;transition:transform .1s;}
   .rte-swatch:hover{transform:scale(1.18);}
-  .rte-marcadores{display:flex;align-items:center;gap:4px;}
+  .rte-emojis{display:flex;align-items:center;gap:4px;}
+  .rte-emoji-btn{font-size:14px;width:28px;height:25px;}
   .rte-mark{width:16px;height:16px;border-radius:3px;border:1px solid var(--line);padding:0;font-size:8px;color:var(--ink-faint);line-height:1;transition:transform .1s;}
   .rte-mark:hover{transform:scale(1.18);}
   .rte-editor{
@@ -220,7 +221,14 @@
   .form-row-foto{align-items:center;}
   .btn-salvar-anotacao{flex-shrink:0;}
   .foto-preview-wrap{margin-top:6px;display:flex;align-items:flex-end;gap:8px;}
-  #fotoPreview{max-width:100px;border-radius:5px;border:1px solid var(--line);display:block;}
+  .link-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+  .link-row input{flex:1;min-width:0;}
+  .link-row .btn-remover-link{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--danger,#dc2626);color:#fff;border:none;font-size:12px;cursor:pointer;line-height:1;}
+  .foto-preview-item{position:relative;display:inline-flex;}
+  .foto-preview-item img{width:80px;height:80px;object-fit:cover;border-radius:5px;border:1px solid var(--line);}
+  .foto-preview-item .btn-remover-foto-individual{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--danger,#dc2626);color:#fff;border:none;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+  .sumario-fotos{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .sumario-foto-thumb{width:72px;height:72px;object-fit:cover;border-radius:5px;border:1px solid var(--line);cursor:zoom-in;}
   .notas-grid{display:flex;flex-direction:column;gap:12px;margin-top:14px;}
   .empty-state{color:var(--ink-soft);font-size:13px;text-align:center;padding:30px 0;}
   .empty-inline{color:var(--ink-faint);font-style:italic;}
@@ -317,7 +325,7 @@
     #areaImpressao .impressao-data{font-size:9.5px;color:#777;font-family:var(--font-mono);font-feature-settings:"tnum" 1;margin-bottom:3px;}
     #areaImpressao .impressao-link{font-size:10.5px;color:#555;margin-top:3px;}
     #areaImpressao .impressao-texto{font-size:12.5px;line-height:1.5;}
-    #areaImpressao .impressao-foto{max-width:100%;max-height:300px;margin-top:6px;border:1px solid #ccc;}
+    #areaImpressao .impressao-foto, #areaImpressao .sumario-fotos{ display:none !important; }
   }
 
   @media (max-width:640px){
@@ -441,8 +449,9 @@
               </div>
             </div>
             <div class="field" style="flex:1;">
-              <label for="anotacaoLink">Link da questão (opcional)</label>
-              <input type="url" id="anotacaoLink" placeholder="https://...">
+              <label>Links da questão (opcional)</label>
+              <div id="linksWrap"></div>
+              <button type="button" id="btnAdicionarLink" class="btn btn-secondary" style="margin-top:4px;font-size:11px;padding:3px 10px;">+ Adicionar link</button>
             </div>
           </div>
           <div class="field">
@@ -462,9 +471,13 @@
               <button type="button" class="rte-swatch" data-color="#EA580C" style="background:#EA580C" title="Laranja"></button>
               <button type="button" class="rte-swatch" data-color="#B9842A" style="background:#B9842A" title="Amarelo dourado"></button>
               <button type="button" class="rte-swatch" data-color="#16A34A" style="background:#16A34A" title="Verde"></button>
+              <button type="button" class="rte-swatch" data-color="#065F46" style="background:#065F46" title="Verde escuro"></button>
               <button type="button" class="rte-swatch" data-color="#2563EB" style="background:#2563EB" title="Azul"></button>
+              <button type="button" class="rte-swatch" data-color="#1E3A5F" style="background:#1E3A5F" title="Azul marinho"></button>
               <button type="button" class="rte-swatch" data-color="#7C3AED" style="background:#7C3AED" title="Roxo"></button>
               <button type="button" class="rte-swatch" data-color="#DB2777" style="background:#DB2777" title="Rosa"></button>
+              <button type="button" class="rte-swatch" data-color="#9D174D" style="background:#9D174D" title="Vinho"></button>
+              <button type="button" class="rte-swatch" data-color="#92400E" style="background:#92400E" title="Marrom"></button>
               <button type="button" class="rte-swatch" data-color="#5C6B78" style="background:#5C6B78" title="Cinza"></button>
             </div>
             <span class="rte-sep"></span>
@@ -476,20 +489,23 @@
               <button type="button" class="rte-mark" data-bg="#BFDBFE" style="background:#BFDBFE" title="Marcador azul"></button>
               <button type="button" class="rte-mark" data-bg="transparent" title="Remover marcador">✕</button>
             </div>
+            <span class="rte-sep"></span>
+            <div class="rte-emojis">
+              <button type="button" class="rte-btn rte-emoji-btn" data-emoji="⚠️" title="Atenção">⚠️</button>
+              <button type="button" class="rte-btn rte-emoji-btn" data-emoji="🚫" title="Proibido">🚫</button>
+              <button type="button" class="rte-btn rte-emoji-btn" data-emoji="✅" title="Correto">✅</button>
+            </div>
           </div>
           <div id="anotacaoTexto" class="rte-editor" contenteditable="true" data-placeholder="Escreva aqui o seu comentário sobre a questão..."></div>
         </div>
         <div class="field">
-          <label for="fotoInput">Foto da questão (opcional)</label>
+          <label for="fotoInput">Fotos da questão (opcional)</label>
           <div class="form-row form-row-foto">
-            <input type="file" id="fotoInput" accept="image/*" style="flex:1;min-width:140px;">
+            <input type="file" id="fotoInput" accept="image/*" multiple style="flex:1;min-width:140px;">
             <button type="button" id="btnCancelarEdicao" class="btn btn-secondary hidden">Cancelar edição</button>
             <button type="submit" class="btn btn-primary btn-salvar-anotacao">Salvar anotação</button>
           </div>
-          <div class="foto-preview-wrap">
-            <img id="fotoPreview" class="hidden" alt="Pré-visualização">
-            <button type="button" id="btnRemoverFoto" class="btn-icon hidden">Remover foto</button>
-          </div>
+          <div id="fotosPreviewWrap" class="fotos-preview-wrap"></div>
         </div>
         </div>
       </form>
@@ -969,7 +985,7 @@ document.getElementById("toggleFormAnotacao").addEventListener("click", ()=>{
   if(aberto && editandoId){
     sairDoModoEdicao();
     document.getElementById("anotacaoTexto").innerHTML = "";
-    document.getElementById("anotacaoLink").value = "";
+    limparLinks();
     limparPreviewFoto();
   }
   if(!aberto){ document.getElementById("anotacaoTexto").focus(); }
@@ -1383,8 +1399,11 @@ document.getElementById("diaModal").addEventListener("click", e=>{
 
 /* ===================== ANOTAÇÕES / QUESTÕES (LOCAL) ================== */
 let editandoId = null;
-let fotoExistenteUrl = null;
-let fotoUrlAoIniciarEdicao = null;
+// Cada elemento de fotosExistentes é {url, file}:
+//   url  = blob: (foto nova, ainda não enviada) ou https: (já salva no Storage)
+//   file = File object (só para blob:, null para https:)
+let fotosExistentes = [];
+let fotosAoIniciarEdicao = [];   // cópia de segurança das URLs https: ao abrir a edição
 
 function lerArquivoComoDataUrl(file){
   return new Promise((resolve, reject)=>{
@@ -1463,6 +1482,34 @@ function chamarNuvem(nomeFuncao, ...args){
 }
 
 
+function criarLinhaLink(valor){
+  const wrap = document.getElementById("linksWrap");
+  const row = document.createElement("div");
+  row.className = "link-row";
+  const input = document.createElement("input");
+  input.type = "url";
+  input.placeholder = "https://...";
+  input.value = valor || "";
+  const btnRem = document.createElement("button");
+  btnRem.type = "button";
+  btnRem.className = "btn-remover-link";
+  btnRem.title = "Remover este link";
+  btnRem.textContent = "✕";
+  btnRem.addEventListener("click", ()=>{ row.remove(); });
+  row.appendChild(input);
+  row.appendChild(btnRem);
+  wrap.appendChild(row);
+  return input;
+}
+function limparLinks(){ document.getElementById("linksWrap").innerHTML = ""; }
+function getLinksSalvos(){
+  return Array.from(document.getElementById("linksWrap").querySelectorAll("input"))
+    .map(el=> normalizarLink(el.value)).filter(Boolean);
+}
+document.getElementById("btnAdicionarLink").addEventListener("click", ()=>{
+  criarLinhaLink("").focus();
+});
+
 function normalizarLink(valor){
   const v = (valor || "").trim();
   if(!v) return "";
@@ -1471,19 +1518,27 @@ function normalizarLink(valor){
   return "https://"+v;
 }
 
-async function salvarOuAtualizarAnotacao(disciplina, assunto, texto, link, file){
-  let fotoUrlFinal;
-  if(file){
-    fotoUrlFinal = await processarFoto(file);
-  } else {
-    fotoUrlFinal = fotoExistenteUrl || null;
+async function salvarOuAtualizarAnotacao(disciplina, assunto, texto, links){
+  // fotosExistentes é um array de {url, file}:
+  //   - url blob: + file File → foto nova, precisa ser comprimida e enviada ao Storage
+  //   - url https: + file null → foto já salva, mantém como está
+  const fotosFinal = [];
+  for(const entrada of fotosExistentes){
+    if(entrada.url.startsWith("blob:") && entrada.file){
+      const urlFinal = await processarFoto(entrada.file);
+      fotosFinal.push(urlFinal);
+    } else if(entrada.url.startsWith("http")){
+      fotosFinal.push(entrada.url);
+    }
   }
 
-  // Se a foto que estava na anotação antes de começar a edição não é mais a foto final
-  // (foi substituída por outra, ou removida), apaga a antiga da nuvem para não acumular lixo.
-  if(fotoUrlAoIniciarEdicao && fotoUrlAoIniciarEdicao !== fotoUrlFinal && fotoUrlAoIniciarEdicao.indexOf("http") === 0){
-    chamarNuvem("excluirFotoNuvem", fotoUrlAoIniciarEdicao);
-  }
+  // Fotos que estavam na anotação antes de abrir a edição e que já não estão em fotosFinal
+  // foram removidas pelo usuário — exclui do Storage para não acumular lixo.
+  fotosAoIniciarEdicao.forEach(urlAntiga=>{
+    if(!fotosFinal.includes(urlAntiga)){
+      chamarNuvem("excluirFotoNuvem", urlAntiga);
+    }
+  });
 
   if(editandoId){
     const item = anotacoesList.find(a=>a.id === editandoId);
@@ -1491,8 +1546,10 @@ async function salvarOuAtualizarAnotacao(disciplina, assunto, texto, link, file)
     item.disciplina = disciplina;
     item.assunto = assunto || "";
     item.texto = texto;
-    item.link = link || "";
-    item.fotoUrl = fotoUrlFinal;
+    item.links = Array.isArray(links) ? links : (links ? [links] : []);
+    delete item.link;
+    item.fotos = fotosFinal;
+    delete item.fotoUrl;
     item.editadoEm = Date.now();
   } else {
     anotacoesList.unshift({
@@ -1500,8 +1557,8 @@ async function salvarOuAtualizarAnotacao(disciplina, assunto, texto, link, file)
       disciplina: disciplina,
       assunto: assunto || "",
       texto: texto,
-      link: link || "",
-      fotoUrl: fotoUrlFinal,
+      links: Array.isArray(links) ? links : (links ? [links] : []),
+      fotos: fotosFinal,
       criadoEm: Date.now()
     });
   }
@@ -1520,41 +1577,68 @@ function atualizarUiModoEdicao(){
 
 function sairDoModoEdicao(){
   editandoId = null;
-  fotoExistenteUrl = null;
-  fotoUrlAoIniciarEdicao = null;
+  fotosExistentes = [];
+  fotosAoIniciarEdicao = [];
   atualizarUiModoEdicao();
+}
+
+function renderizarPreviewFotos(){
+  const wrap = document.getElementById("fotosPreviewWrap");
+  wrap.innerHTML = "";
+  fotosExistentes.forEach((entrada, idx)=>{
+    const item = document.createElement("div");
+    item.className = "foto-preview-item";
+    const img = document.createElement("img");
+    img.src = entrada.url;
+    img.alt = "Foto "+(idx+1);
+    const btnRem = document.createElement("button");
+    btnRem.type = "button";
+    btnRem.className = "btn-remover-foto-individual";
+    btnRem.title = "Remover esta foto";
+    btnRem.textContent = "✕";
+    btnRem.addEventListener("click", ()=>{
+      fotosExistentes.splice(idx, 1);
+      renderizarPreviewFotos();
+    });
+    item.appendChild(img);
+    item.appendChild(btnRem);
+    wrap.appendChild(item);
+  });
 }
 
 function limparPreviewFoto(){
   document.getElementById("fotoInput").value = "";
-  document.getElementById("fotoPreview").classList.add("hidden");
-  document.getElementById("btnRemoverFoto").classList.add("hidden");
+  fotosExistentes = [];
+  renderizarPreviewFotos();
+}
+
+// Compatibilidade retroativa: anotações antigas usam fotoUrl (string única).
+// Converte para o formato novo {url, file: null} para uso interno.
+function getFotosDeAnotacao(item){
+  if(Array.isArray(item.fotos) && item.fotos.length) return item.fotos.map(u=>({url:u, file:null}));
+  if(item.fotoUrl) return [{url:item.fotoUrl, file:null}];
+  return [];
 }
 
 function iniciarEdicaoAnotacao(id){
   const item = anotacoesList.find(a=>a.id === id);
   if(!item) return;
   editandoId = id;
-  fotoExistenteUrl = item.fotoUrl || null;
-  fotoUrlAoIniciarEdicao = fotoExistenteUrl;
+  fotosExistentes = getFotosDeAnotacao(item);
+  fotosAoIniciarEdicao = fotosExistentes.map(e=>e.url).filter(u=>u.startsWith("http"));
 
   const selDisciplina = document.getElementById("anotacaoDisciplina");
-  if(selDisciplina.value !== item.disciplina){
-    selDisciplina.value = item.disciplina;
-  }
+  if(selDisciplina.value !== item.disciplina) selDisciplina.value = item.disciplina;
   populateAssuntoSelect(document.getElementById("anotacaoAssunto"), item.disciplina);
   document.getElementById("anotacaoAssunto").value = item.assunto || "";
   document.getElementById("anotacaoTexto").innerHTML = item.texto || "";
-  document.getElementById("anotacaoLink").value = item.link || "";
+  // Compatibilidade: anotações antigas têm `link` (string), novas têm `links` (array)
+  limparLinks();
+  const linksParaCarregar = Array.isArray(item.links) ? item.links : (item.link ? [item.link] : []);
+  linksParaCarregar.forEach(l=> criarLinhaLink(l));
 
-  if(fotoExistenteUrl){
-    document.getElementById("fotoInput").value = "";
-    document.getElementById("fotoPreview").src = fotoExistenteUrl;
-    document.getElementById("fotoPreview").classList.remove("hidden");
-    document.getElementById("btnRemoverFoto").classList.remove("hidden");
-  } else {
-    limparPreviewFoto();
-  }
+  document.getElementById("fotoInput").value = "";
+  renderizarPreviewFotos();
 
   document.getElementById("corpoFormAnotacao").classList.remove("hidden");
   document.getElementById("toggleFormAnotacao").textContent = "✕ Fechar";
@@ -1566,27 +1650,19 @@ function iniciarEdicaoAnotacao(id){
 document.getElementById("btnCancelarEdicao").addEventListener("click", ()=>{
   sairDoModoEdicao();
   document.getElementById("anotacaoTexto").innerHTML = "";
-  document.getElementById("anotacaoLink").value = "";
-  limparPreviewFoto();
-});
-
-document.getElementById("btnRemoverFoto").addEventListener("click", ()=>{
-  fotoExistenteUrl = null;
+  limparLinks();
   limparPreviewFoto();
 });
 
 document.getElementById("fotoInput").addEventListener("change", e=>{
-  const file = e.target.files[0];
-  const preview = document.getElementById("fotoPreview");
-  const btnRemover = document.getElementById("btnRemoverFoto");
-  if(file){
-    preview.src = URL.createObjectURL(file);
-    preview.classList.remove("hidden");
-    btnRemover.classList.remove("hidden");
-  } else if(!fotoExistenteUrl){
-    preview.classList.add("hidden");
-    btnRemover.classList.add("hidden");
-  }
+  const files = Array.from(e.target.files || []);
+  files.forEach(file=>{
+    fotosExistentes.push({ url: URL.createObjectURL(file), file: file });
+  });
+  renderizarPreviewFotos();
+  // Zera o input para que o mesmo arquivo possa ser selecionado de novo se necessário,
+  // e porque o File object já foi capturado em fotosExistentes.
+  e.target.value = "";
 });
 
 document.querySelectorAll(".rte-btn, .rte-swatch, .rte-mark").forEach(btn=>{
@@ -1604,6 +1680,12 @@ document.querySelectorAll(".rte-btn[data-cmd]").forEach(btn=>{
     focarEditorComEstiloCSS();
     try{ document.execCommand(btn.dataset.cmd); }catch(e){ console.error(e); }
     atualizarEstadoToolbar();
+  });
+});
+document.querySelectorAll(".rte-emoji-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    focarEditorComEstiloCSS();
+    try{ document.execCommand("insertText", false, btn.dataset.emoji); }catch(e){ console.error(e); }
   });
 });
 document.querySelectorAll(".rte-btn[data-fontsize-px]").forEach(btn=>{
@@ -1697,19 +1779,21 @@ document.getElementById("formAnotacao").addEventListener("submit", async e=>{
   if(assunto === "__add__") return;
   const editorEl = document.getElementById("anotacaoTexto");
   const texto = isHtmlVazio(editorEl.innerHTML) ? "" : sanitizeRichText(editorEl.innerHTML);
-  const link = normalizarLink(document.getElementById("anotacaoLink").value);
-  const file = document.getElementById("fotoInput").files[0] || null;
-  if(!texto && !file && !fotoExistenteUrl){
-    alert("Escreva uma anotação ou anexe uma foto.");
-    return;
-  }
+  const links = getLinksSalvos();
   const btnSubmit = e.target.querySelector('button[type="submit"]');
   btnSubmit.disabled = true;
   btnSubmit.textContent = "Salvando...";
+  const temConteudo = texto || fotosExistentes.length > 0 || links.length > 0;
+  if(!temConteudo){
+    alert("Escreva uma anotação, anexe uma foto ou adicione um link.");
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = editandoId ? "Salvar alterações" : "Salvar anotação";
+    return;
+  }
   try{
-    await salvarOuAtualizarAnotacao(disciplina, assunto, texto, link, file);
+    await salvarOuAtualizarAnotacao(disciplina, assunto, texto, links);
     editorEl.innerHTML = "";
-    document.getElementById("anotacaoLink").value = "";
+    limparLinks();
     limparPreviewFoto();
     sairDoModoEdicao();
     mostrarSeloRegistrado();
@@ -1734,18 +1818,21 @@ function chaveOrdenacao(a){
 }
 
 function montarItemSumario(a){
-  const fotoEl = a.fotoUrl
-    ? '<img src="'+a.fotoUrl+'" class="sumario-foto-thumb" data-lightbox="'+a.fotoUrl+'" alt="Foto da questão" title="Clique para ampliar">'
+  const fotosArr = Array.isArray(a.fotos) && a.fotos.length ? a.fotos : (a.fotoUrl ? [a.fotoUrl] : []);
+  const fotosEl = fotosArr.length
+    ? '<div class="sumario-fotos">'+fotosArr.map(url=>
+        '<img src="'+url+'" class="sumario-foto-thumb" data-lightbox="'+url+'" alt="Foto da questão" title="Clique para ampliar">'
+      ).join("")+'</div>'
     : '';
   const texto = a.texto ? sanitizeRichText(a.texto) : '<span class="empty-inline">(sem texto)</span>';
-  const linkEl = a.link
-    ? '<a class="sumario-item-link" href="'+escapeHtml(a.link)+'" target="_blank" rel="noopener noreferrer">🔗 Ver questão</a>'
-    : '';
+  const linksArr = Array.isArray(a.links) ? a.links : (a.link ? [a.link] : []);
+  const linkEl = linksArr.map((l,i)=>
+    '<a class="sumario-item-link" href="'+escapeHtml(l)+'" target="_blank" rel="noopener noreferrer">🔗 '+(linksArr.length > 1 ? "Link "+(i+1) : "Ver questão")+'</a>'
+  ).join(" ");
   return '<li class="sumario-item" draggable="true" data-id="'+a.id+'">'+
       '<span class="drag-handle" title="Arraste para reordenar">⋮⋮</span>'+
-      '<div class="sumario-item-conteudo">'+texto+linkEl+'</div>'+
+      '<div class="sumario-item-conteudo">'+texto+linkEl+fotosEl+'</div>'+
       '<div class="sumario-item-acoes">'+
-        fotoEl+
         '<div class="mover-col">'+
           '<button type="button" class="mover-btn" data-move="up" data-id="'+a.id+'" title="Mover para cima">▲</button>'+
           '<button type="button" class="mover-btn" data-move="down" data-id="'+a.id+'" title="Mover para baixo">▼</button>'+
@@ -1875,9 +1962,28 @@ function obterBucketOrdenado(item){
 }
 
 function aplicarNovaOrdem(itensNaNovaOrdem){
+  // Captura quais assuntos estão expandidos antes de re-renderizar
+  const expandidos = new Set();
+  document.querySelectorAll(".assunto-toggle[aria-expanded='true']").forEach(btn=>{
+    const tituloEl = btn.querySelector(".assunto-titulo");
+    if(tituloEl) expandidos.add(tituloEl.textContent.trim());
+  });
+
   itensNaNovaOrdem.forEach((item, idx)=>{ item.ordem = idx; });
   salvarNoLocalStorage(LS_ANOTACOES, anotacoesList);
   renderAnotacoes();
+
+  // Restaura o estado de expansão dos assuntos após re-renderizar
+  if(expandidos.size > 0){
+    document.querySelectorAll(".assunto-toggle").forEach(btn=>{
+      const tituloEl = btn.querySelector(".assunto-titulo");
+      if(tituloEl && expandidos.has(tituloEl.textContent.trim())){
+        btn.setAttribute("aria-expanded", "true");
+        btn.querySelector(".assunto-seta").textContent = "▾";
+        btn.closest(".assunto-grupo").querySelector(".assunto-lista").classList.remove("collapsed");
+      }
+    });
+  }
 }
 
 function moverAnotacao(id, direcao){
@@ -1939,8 +2045,11 @@ function conectarAcoesDaLista(container){
     btn.addEventListener("click", ()=>{
       if(confirm("Excluir esta anotação?")){
         const itemExcluido = anotacoesList.find(a=>a.id === btn.dataset.delNota);
-        if(itemExcluido && itemExcluido.fotoUrl && itemExcluido.fotoUrl.indexOf("http") === 0){
-          chamarNuvem("excluirFotoNuvem", itemExcluido.fotoUrl);
+        if(itemExcluido){
+          const fotosExc = Array.isArray(itemExcluido.fotos) && itemExcluido.fotos.length
+            ? itemExcluido.fotos
+            : (itemExcluido.fotoUrl ? [itemExcluido.fotoUrl] : []);
+          fotosExc.forEach(url=>{ if(url.startsWith("http")) chamarNuvem("excluirFotoNuvem", url); });
         }
         anotacoesList = anotacoesList.filter(a=>a.id !== btn.dataset.delNota);
         salvarNoLocalStorage(LS_ANOTACOES, anotacoesList);
@@ -1970,7 +2079,8 @@ function imprimirDisciplina(disciplina){
   function montarItemImpresso(a){
     const texto = a.texto ? '<div class="impressao-texto">'+sanitizeRichText(a.texto)+'</div>' : "";
     const linkHtml = a.link ? '<div class="impressao-link">Link: '+escapeHtml(a.link)+'</div>' : "";
-    const foto = a.fotoUrl ? '<img class="impressao-foto" src="'+a.fotoUrl+'">' : "";
+    const fotosImpArr = Array.isArray(a.fotos) && a.fotos.length ? a.fotos : (a.fotoUrl ? [a.fotoUrl] : []);
+    const foto = fotosImpArr.map(url=>'<img class="impressao-foto" src="'+url+'">').join("");
     return '<div class="impressao-item">'+
         '<div class="impressao-data">'+new Date(a.criadoEm).toLocaleDateString("pt-BR")+'</div>'+
         texto + linkHtml + foto +
@@ -2056,6 +2166,12 @@ function aplicarConfigDaNuvem(config){
 window.aplicarHorasDaNuvem = aplicarHorasDaNuvem;
 window.aplicarAnotacoesDaNuvem = aplicarAnotacoesDaNuvem;
 window.aplicarConfigDaNuvem = aplicarConfigDaNuvem;
+// Expõe para o ambiente de testes (smoke_test.js injeta fotos diretamente)
+Object.defineProperty(window, "fotosExistentes", {
+  get(){ return fotosExistentes; },
+  set(v){ fotosExistentes = v; }
+});
+window.renderizarPreviewFotos = renderizarPreviewFotos;
 </script>
 
 <script type="module">
@@ -2194,11 +2310,18 @@ window.aplicarConfigDaNuvem = aplicarConfigDaNuvem;
     // Firestore, senão o documento pode ficar grande demais.
     for(const a of anotacoesLocais){
       if(a.fotoUrl && a.fotoUrl.indexOf("data:") === 0){
-        try{ a.fotoUrl = await window.uploadFotoNuvem(a.fotoUrl); }
-        catch(e){
+        try{
+          const novaUrl = await window.uploadFotoNuvem(a.fotoUrl);
+          a.fotos = [novaUrl];
+          delete a.fotoUrl;
+        } catch(e){
           console.error("Não foi possível migrar a foto de uma anotação:", e);
-          a.fotoUrl = null;
+          a.fotos = [];
+          delete a.fotoUrl;
         }
+      } else if(a.fotoUrl){
+        a.fotos = [a.fotoUrl];
+        delete a.fotoUrl;
       }
     }
 
