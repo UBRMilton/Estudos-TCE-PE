@@ -4,10 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Estudos TCE-PE</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
+<link rel="pa
     --bg:#F2F4F5;
     --surface:#FFFFFF;
     --surface-2:#EAEDEF;
@@ -297,7 +294,24 @@
   .modal-overlay{position:fixed;inset:0;background:rgba(15,20,24,.5);display:flex;align-items:center;justify-content:center;z-index:80;padding:18px;}
   .modal-card{background:var(--surface);border-radius:var(--radius);padding:16px;width:100%;max-width:300px;box-shadow:var(--shadow-card);}
   .modal-card h3{font-family:var(--font-display);margin:0 0 9px;font-size:12.5px;}
-  .dia-modal-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .timer-flutuante{
+    position:fixed; bottom:24px; right:24px; z-index:900;
+    display:flex; align-items:center; gap:8px;
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:9px 12px;
+    box-shadow:0 4px 16px rgba(0,0,0,.13);
+    opacity:.9; cursor:default; user-select:none;
+    min-width:190px;
+  }
+  .timer-flutuante.hidden{display:none;}
+  .timer-flutuante-drag{font-size:13px; color:var(--ink-faint); cursor:grab; padding:0 2px; flex-shrink:0; line-height:1;}
+  .timer-flutuante-drag:active{cursor:grabbing;}
+  .timer-flutuante-dot{width:8px; height:8px; border-radius:50%; background:#dc2626; flex-shrink:0;}
+  .timer-flutuante-info{flex:1; min-width:0;}
+  .timer-flutuante-disciplina{font-size:10px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .timer-flutuante-tempo{font-family:var(--font-mono); font-feature-settings:"tnum" 1; font-size:17px; font-weight:600; color:var(--ink); line-height:1.25;}
+  .timer-flutuante-btn{flex-shrink:0; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink-soft); font-size:11px; padding:4px 10px; cursor:pointer; white-space:nowrap;}
+  .timer-flutuante-btn:hover{background:var(--surface-2);}
   .dia-modal-item:last-child{border-bottom:none;}
   .dia-modal-info{flex:1;min-width:0;}
   .dia-modal-dur{font-family:var(--font-mono);font-feature-settings:"tnum" 1;font-size:12px;font-weight:600;color:var(--ink);}
@@ -551,7 +565,16 @@
   </div>
 </div>
 
-<!-- ===================== MODAL DETALHES DO DIA (CALENDÁRIO) ===================== -->
+<!-- ===================== CRONÔMETRO FLUTUANTE ===================== -->
+<div id="timerFlutuante" class="timer-flutuante hidden">
+  <div class="timer-flutuante-drag" id="timerFlutuanteDrag">⋮⋮</div>
+  <div class="timer-flutuante-dot"></div>
+  <div class="timer-flutuante-info">
+    <div class="timer-flutuante-disciplina" id="timerFlutuanteDisciplina"></div>
+    <div class="timer-flutuante-tempo" id="timerFlutuanteTempo">00:00:00</div>
+  </div>
+  <button type="button" class="timer-flutuante-btn" id="timerFlutuanteBtn">Finalizar</button>
+</div>
 <div id="diaModal" class="modal-overlay hidden">
   <div class="modal-card" style="max-width:340px;">
     <h3 id="diaModalTitulo">Registros do dia</h3>
@@ -1072,8 +1095,79 @@ document.querySelectorAll(".tab-btn").forEach(btn=>{
     document.getElementById("painelHoras").classList.add("hidden");
     document.getElementById("painelAnotacoes").classList.add("hidden");
     document.getElementById(btn.dataset.tab).classList.remove("hidden");
+    atualizarVisibilidadeTimerFlutuante();
   });
 });
+
+/* =================== PAINEL FLUTUANTE DO CRONÔMETRO =================== */
+function atualizarVisibilidadeTimerFlutuante(){
+  const flutuante = document.getElementById("timerFlutuante");
+  const abaHorasAtiva = document.querySelector('.tab-btn[data-tab="painelHoras"]').classList.contains("active");
+  if(activeTimer && !abaHorasAtiva){
+    flutuante.classList.remove("hidden");
+    document.getElementById("timerFlutuanteDisciplina").textContent = activeTimer.disciplina || "";
+  } else {
+    flutuante.classList.add("hidden");
+  }
+}
+
+function atualizarTempoFlutuante(){
+  if(!activeTimer) return;
+  const segundos = activeTimer.acumulado + (activeTimer.pausado ? 0 : Math.floor((Date.now()-activeTimer.inicioSegmento)/1000));
+  document.getElementById("timerFlutuanteTempo").textContent = formatHMS(segundos);
+}
+
+document.getElementById("timerFlutuanteBtn").addEventListener("click", ()=>{
+  document.getElementById("btnFinalizarTimer").dispatchEvent(new Event("click", {bubbles:true}));
+  atualizarVisibilidadeTimerFlutuante();
+});
+
+// Drag-to-move: arrasta pelo handle ⋮⋮
+(function(){
+  const el = document.getElementById("timerFlutuante");
+  const handle = document.getElementById("timerFlutuanteDrag");
+  let arrastando = false, ox = 0, oy = 0;
+  handle.addEventListener("mousedown", e=>{
+    arrastando = true;
+    const r = el.getBoundingClientRect();
+    ox = e.clientX - r.left;
+    oy = e.clientY - r.top;
+    e.preventDefault();
+  });
+  document.addEventListener("mousemove", e=>{
+    if(!arrastando) return;
+    let left = e.clientX - ox;
+    let top  = e.clientY - oy;
+    left = Math.max(0, Math.min(left, window.innerWidth  - el.offsetWidth));
+    top  = Math.max(0, Math.min(top,  window.innerHeight - el.offsetHeight));
+    el.style.left   = left+"px";
+    el.style.top    = top+"px";
+    el.style.right  = "auto";
+    el.style.bottom = "auto";
+  });
+  document.addEventListener("mouseup", ()=>{ arrastando = false; });
+  // Suporte a toque (mobile/tablet)
+  handle.addEventListener("touchstart", e=>{
+    arrastando = true;
+    const r = el.getBoundingClientRect();
+    const t = e.touches[0];
+    ox = t.clientX - r.left;
+    oy = t.clientY - r.top;
+  }, {passive:true});
+  document.addEventListener("touchmove", e=>{
+    if(!arrastando) return;
+    const t = e.touches[0];
+    let left = t.clientX - ox;
+    let top  = t.clientY - oy;
+    left = Math.max(0, Math.min(left, window.innerWidth  - el.offsetWidth));
+    top  = Math.max(0, Math.min(top,  window.innerHeight - el.offsetHeight));
+    el.style.left   = left+"px";
+    el.style.top    = top+"px";
+    el.style.right  = "auto";
+    el.style.bottom = "auto";
+  }, {passive:true});
+  document.addEventListener("touchend", ()=>{ arrastando = false; });
+})();
 
 /* ============================== TIMER =================================== */
 function atualizarBotoesTimer(){
@@ -1115,6 +1209,7 @@ function atualizarDisplayTimer(){
   if(!activeTimer) return;
   const segundos = activeTimer.acumulado + (activeTimer.pausado ? 0 : Math.floor((Date.now()-activeTimer.inicioSegmento)/1000));
   document.getElementById("timerDisplay").textContent = formatHMS(segundos);
+  atualizarTempoFlutuante();
 }
 
 document.getElementById("btnIniciarTimer").addEventListener("click", ()=>{
@@ -1127,6 +1222,7 @@ document.getElementById("btnIniciarTimer").addEventListener("click", ()=>{
   localStorage.setItem(TIMER_KEY, JSON.stringify(activeTimer));
   iniciarIntervaloTimer();
   atualizarBotoesTimer();
+  atualizarVisibilidadeTimerFlutuante();
 });
 
 document.getElementById("btnPausarTimer").addEventListener("click", ()=>{
@@ -1156,6 +1252,7 @@ document.getElementById("btnFinalizarTimer").addEventListener("click", ()=>{
   localStorage.removeItem(TIMER_KEY);
   document.getElementById("timerDisplay").textContent = "00:00:00";
   atualizarBotoesTimer();
+  atualizarVisibilidadeTimerFlutuante();
   if(segundos < 1) return;
   salvarHora(disciplina, segundos, dataISO, "cronometro", "").then(mostrarSeloRegistrado);
 });
@@ -1179,6 +1276,7 @@ function restaurarTimerSalvo(){
     if(!activeTimer.pausado) iniciarIntervaloTimer();
     else atualizarDisplayTimer();
     atualizarBotoesTimer();
+    atualizarVisibilidadeTimerFlutuante();
   } catch(e){
     localStorage.removeItem(TIMER_KEY);
   }
