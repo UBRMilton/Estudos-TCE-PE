@@ -203,6 +203,28 @@
   .rte-swatch:hover{transform:scale(1.18);}
   .rte-emojis{display:flex;align-items:center;gap:4px;}
   .rte-emoji-btn{font-size:14px;width:28px;height:25px;}
+  .rte-juri-btn{font-size:14px;width:28px;height:25px;font-weight:700;}
+  .rte-juri-btn.active{background:var(--gold-soft);color:var(--gold);}
+  /* Bloco de jurisprudência — exibido no editor e no sumário */
+  .juri-bloco{
+    border-left:3px solid #B9842A;
+    background:#FFFBF2;
+    padding:8px 12px 8px 14px;
+    border-radius:0 6px 6px 0;
+    margin:6px 0;
+    font-style:italic;
+    line-height:1.65;
+  }
+  .juri-bloco::before{
+    content:"⚖ JURISPRUDÊNCIA";
+    display:block;
+    font-size:9.5px;
+    font-weight:700;
+    font-style:normal;
+    color:#B9842A;
+    letter-spacing:.06em;
+    margin-bottom:5px;
+  }
   .rte-mark{width:16px;height:16px;border-radius:3px;border:1px solid var(--line);padding:0;font-size:8px;color:var(--ink-faint);line-height:1;transition:transform .1s;}
   .rte-mark:hover{transform:scale(1.18);}
   .rte-editor{
@@ -315,6 +337,44 @@
   .timer-flutuante-tempo{font-family:var(--font-mono); font-feature-settings:"tnum" 1; font-size:17px; font-weight:600; color:var(--ink); line-height:1.25;}
   .timer-flutuante-btn{flex-shrink:0; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink-soft); font-size:11px; padding:4px 10px; cursor:pointer; white-space:nowrap;}
   .timer-flutuante-btn:hover{background:var(--surface-2);}
+  /* ---- Painel Planejamento ---- */
+  .plan-bloco{margin-bottom:28px;}
+  .plan-bloco-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px;}
+  .plan-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius);border:1px solid var(--line);}
+  .plan-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .plan-table th{text-align:left;padding:7px 10px;font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border-bottom:1px solid var(--line);}
+  .plan-table td{padding:4px 8px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  .plan-table tr:last-child td{border-bottom:none;}
+  .plan-table tfoot td{font-size:11.5px;font-weight:700;color:var(--ink);background:var(--surface-2);border-top:1px solid var(--line);border-bottom:none;padding:7px 10px;}
+  .plan-total-label{color:var(--ink-soft);}
+  .plan-field-input{border:none;background:transparent;font:inherit;padding:2px 0;width:100%;outline:none;color:inherit;min-width:40px;}
+  .plan-field-input:focus{background:var(--accent-soft);border-radius:4px;padding:2px 4px;}
+  .plan-num-input{text-align:right;font-family:var(--font-mono);font-feature-settings:"tnum" 1;}
+  .plan-bar-wrap{height:5px;background:var(--line);border-radius:3px;overflow:hidden;display:inline-block;width:60px;vertical-align:middle;margin-right:5px;flex-shrink:0;}
+  .plan-bar{height:100%;background:var(--accent);border-radius:3px;transition:width .3s;}
+  .plan-pct-cell{display:flex;align-items:center;white-space:nowrap;font-size:11.5px;color:var(--ink-soft);font-family:var(--font-mono);font-feature-settings:"tnum" 1;}
+  .plan-crono-table{border-collapse:collapse;font-size:12px;width:100%;min-width:700px;}
+  .plan-crono-table th{padding:6px 8px;font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);text-align:center;}
+  .plan-crono-table th.plan-crono-slot-th{min-width:70px;text-align:left;}
+  .plan-crono-table td{padding:0;border:1px solid var(--line);vertical-align:top;}
+  .plan-crono-slot-input{width:100%;padding:6px 8px;border:none;background:transparent;font:inherit;font-size:11.5px;font-weight:600;color:var(--ink-soft);outline:none;box-sizing:border-box;}
+  .plan-crono-slot-input:focus{background:var(--accent-soft);}
+  .plan-crono-cell{width:100%;min-height:52px;padding:6px 8px;border:none;background:transparent;resize:none;font:inherit;font-size:11.5px;line-height:1.5;color:var(--ink);box-sizing:border-box;display:block;}
+  .plan-crono-cell:focus{outline:none;background:var(--accent-soft);}
+  /* Opção C: cards por dia */
+  .crono-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+  @media(min-width:640px){.crono-grid{grid-template-columns:repeat(4,1fr);}}
+  .crono-card{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius);padding:10px;}
+  .crono-card-fds{border-color:var(--accent-soft);background:var(--accent-soft);}
+  .crono-card-titulo{font-size:11.5px;font-weight:700;color:var(--ink);margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--line);}
+  .crono-card-fds .crono-card-titulo{color:var(--accent-dark);}
+  .crono-card-bloco{display:flex;align-items:baseline;gap:5px;margin-bottom:4px;}
+  .crono-card-num{font-size:9.5px;font-weight:600;color:var(--ink-faint);min-width:14px;flex-shrink:0;}
+  .crono-bloco-display{flex:1;min-width:0;cursor:pointer;padding:1px 3px;border-radius:3px;}
+  .crono-bloco-display:hover{background:var(--surface);}
+  .crono-bloco-editor{flex:1;min-width:0;border:none;background:var(--surface);font:inherit;font-size:11px;color:var(--ink);outline:none;padding:2px 4px;border-radius:3px;resize:none;box-shadow:0 0 0 1.5px var(--accent);}
+  .plan-btn-del{width:20px;height:20px;border-radius:4px;background:transparent;border:none;color:var(--ink-faint);cursor:pointer;font-size:12px;line-height:1;padding:0;}
+  .plan-btn-del:hover{color:var(--danger);background:var(--danger-soft);}
   .dia-modal-item:last-child{border-bottom:none;}
   .dia-modal-info{flex:1;min-width:0;}
   .dia-modal-dur{font-family:var(--font-mono);font-feature-settings:"tnum" 1;font-size:12px;font-weight:600;color:var(--ink);}
@@ -398,6 +458,7 @@
     <nav class="tab-nav">
       <button class="tab-btn active" data-tab="painelHoras">Horas de Estudo</button>
       <button class="tab-btn" data-tab="painelAnotacoes">Questões &amp; Anotações</button>
+      <button class="tab-btn" data-tab="painelPlanejamento">Planejamento</button>
     </nav>
 
     <!-- ---------- PAINEL: HORAS DE ESTUDO ---------- -->
@@ -512,6 +573,8 @@
               <button type="button" class="rte-btn rte-emoji-btn" data-emoji="🚫" title="Proibido">🚫</button>
               <button type="button" class="rte-btn rte-emoji-btn" data-emoji="✅" title="Correto">✅</button>
             </div>
+            <span class="rte-sep"></span>
+            <button type="button" class="rte-btn rte-juri-btn" id="btnJurisprudencia" title="Bloco de jurisprudência (selecione o texto antes)">⚖</button>
           </div>
           <div id="anotacaoTexto" class="rte-editor" contenteditable="true" data-placeholder="Escreva aqui o seu comentário sobre a questão..."></div>
         </div>
@@ -528,6 +591,73 @@
       </form>
 
       <div class="notas-grid" id="anotacoesLista"></div>
+    </section>
+
+    <!-- ---------- PAINEL: PLANEJAMENTO ---------- -->
+    <section class="tab-panel hidden" id="painelPlanejamento" style="padding:20px;">
+
+      <!-- Progresso por Disciplina -->
+      <div class="plan-bloco">
+        <div class="plan-bloco-header">
+          <h2 class="section-title" style="margin:0">Progresso por Disciplina</h2>
+          <button type="button" class="btn btn-primary" style="font-size:11px;padding:4px 12px;" id="btnPlanAdicionarProgressoLinha">+ Disciplina</button>
+        </div>
+        <div class="plan-table-wrap">
+          <table class="plan-table">
+            <thead><tr>
+              <th style="min-width:180px">Disciplina</th>
+              <th style="text-align:right;min-width:70px">Total</th>
+              <th style="text-align:right;min-width:80px">Resolvidas</th>
+              <th style="min-width:120px">Concluído</th>
+              <th style="width:26px"></th>
+            </tr></thead>
+            <tbody id="planProgressoTbody"></tbody>
+            <tfoot><tr>
+              <td class="plan-total-label">TOTAL</td>
+              <td id="planTotalT" style="text-align:right;font-family:var(--font-mono);font-feature-settings:'tnum' 1"></td>
+              <td id="planTotalR" style="text-align:right;font-family:var(--font-mono);font-feature-settings:'tnum' 1"></td>
+              <td id="planTotalPct" class="plan-pct-cell"></td>
+              <td></td>
+            </tr></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Cronograma Semanal -->
+      <div class="plan-bloco">
+        <div class="plan-bloco-header">
+          <h2 class="section-title" style="margin:0">Cronograma Semanal</h2>
+          <div style="display:flex;gap:6px">
+            <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 12px;" id="btnPlanRemoverSlot">− Bloco</button>
+            <button type="button" class="btn btn-primary" style="font-size:11px;padding:4px 12px;" id="btnPlanAdicionarSlot">+ Bloco</button>
+          </div>
+        </div>
+        <div id="planCronogramaGrid" class="crono-grid"></div>
+      </div>
+
+      <!-- Distribuição na Prova -->
+      <div class="plan-bloco">
+        <div class="plan-bloco-header">
+          <h2 class="section-title" style="margin:0">Distribuição na Prova</h2>
+          <button type="button" class="btn btn-primary" style="font-size:11px;padding:4px 12px;" id="btnPlanAdicionarProvaLinha">+ Matéria</button>
+        </div>
+        <div class="plan-table-wrap" style="max-width:360px">
+          <table class="plan-table">
+            <thead><tr>
+              <th style="min-width:200px">Disciplina / Matéria</th>
+              <th style="text-align:right;min-width:80px">Questões</th>
+              <th style="width:26px"></th>
+            </tr></thead>
+            <tbody id="planProvaTbody"></tbody>
+            <tfoot><tr>
+              <td class="plan-total-label">TOTAL</td>
+              <td id="planTotalQ" style="text-align:right;font-family:var(--font-mono);font-feature-settings:'tnum' 1"></td>
+              <td></td>
+            </tr></tfoot>
+          </table>
+        </div>
+      </div>
+
     </section>
   </main>
 </div>
@@ -627,7 +757,69 @@ const LS_ANOTACOES = "tcepe_anotacoes";
 const LS_DISCIPLINAS = "tcepe_disciplinas_custom";
 const LS_DISCIPLINAS_REMOVIDAS = "tcepe_disciplinas_removidas";
 const LS_ASSUNTOS = "tcepe_assuntos_custom";
+const LS_PLANEJAMENTO = "tcepe_planejamento";
 const SEM_ASSUNTO = "Sem assunto específico";
+const DIAS_SEMANA_PLAN = ["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+
+// Dados pré-carregados do Excel enviado pelo usuário.
+// Servem como ponto de partida na primeira vez que o app é aberto com esta versão.
+const PLANEJAMENTO_DEFAULT = {
+  progresso:[
+    {d:"Direito Administrativo",t:1409,r:300},
+    {d:"AFO/Direito Financeiro",t:1214,r:370},
+    {d:"Direito Constitucional",t:1089,r:260},
+    {d:"Contabilidade Pública",t:1079,r:280},
+    {d:"Contabilidade Geral",t:817,r:260},
+    {d:"Administração Pública",t:530,r:150},
+    {d:"Auditoria",t:495,r:200},
+    {d:"Tecnologia da Informação e IA",t:398,r:170},
+    {d:"Direito Civil",t:384,r:65},
+    {d:"Português",t:374,r:103},
+    {d:"Direito Tributário",t:316,r:90},
+    {d:"Direito Processual Civil",t:313,r:80},
+    {d:"Ciências Atuariais",t:280,r:100},
+    {d:"Estatística",t:206,r:35},
+    {d:"Direito Penal",t:166,r:70},
+    {d:"Direito Previdenciário",t:164,r:40},
+    {d:"Jurisprudência - Constitucional",t:319,r:0},
+    {d:"Jurisprudência - Administrativo",t:161,r:0},
+    {d:"Controle Externo",t:144,r:70},
+    {d:"Jurisprudência - Tributário",t:141,r:0},
+    {d:"Segurança de TI",t:100,r:0},
+    {d:"Precatórios",t:60,r:0},
+    {d:"Jurisprudência - Finanças Públicas",t:58,r:0},
+    {d:"Jurisprudência - Civil",t:51,r:0},
+    {d:"Z - TI",t:428,r:1}
+  ],
+  cronograma:{
+    slots:["Bloco 1","Bloco 2","Bloco 3","Bloco 4","Bloco 5"],
+    celulas:[
+      ["Direito Tributário (20)\nControle Externo (20)","Direito Civil (20)\nDireito Processual Civil (20)","Direito Penal (20)\nPortuguês (20)","Direito Previdenciário (20)\nCiências Atuariais (20)","Direito Tributário (20)\nControle Externo (20)","Direito Civil (20)\nDireito Processual Civil (20)","Direito Penal (20)\nPortuguês (20)"],
+      ["AFO/Direito Financeiro (40)","Direito Constitucional (30)","AFO/Direito Financeiro (40)","Direito Constitucional (30)","AFO/Direito Financeiro (40)","Direito Constitucional (60)","AFO/Direito Financeiro (60)"],
+      ["Contabilidade Geral (30)","Contabilidade Pública (40)","Contabilidade Geral (30)","Contabilidade Pública (40)","Contabilidade Geral (30)","Contabilidade Pública (60)","Contabilidade Geral (60)"],
+      ["TI (30)","Direito Administrativo (40)","TI (30)","Direito Administrativo (40)","TI (30)","Direito Administrativo (60)","TI (40)"],
+      ["Auditoria (30)","Administração Pública (30)","Auditoria (30)","Estatística","Auditoria (30)","Administração Pública (40)","Auditoria (40)"]
+    ]
+  },
+  prova:[
+    {m:"Direito Financeiro",q:14},
+    {m:"Direito Administrativo",q:11},
+    {m:"Auditoria Governamental",q:8},
+    {m:"Contabilidade Pública",q:8},
+    {m:"Língua Portuguesa",q:6},
+    {m:"Direito Constitucional",q:5},
+    {m:"Contabilidade Geral",q:4},
+    {m:"Análise de Dados e IA",q:4},
+    {m:"Estatística",q:3},
+    {m:"Administração Pública",q:3},
+    {m:"Direito Civil",q:3},
+    {m:"Direito Processual Civil",q:3},
+    {m:"Controle Externo",q:2},
+    {m:"Direito Penal",q:2},
+    {m:"Direito Tributário",q:2},
+    {m:"Direito Previdenciário e Avaliação Atuarial",q:2}
+  ]
+};
 
 function gerarId(){
   return Date.now().toString(36)+Math.random().toString(36).slice(2,9);
@@ -673,6 +865,8 @@ function sincronizarChaveComNuvem(chave, valor){
       disciplinasRemovidas: disciplinasRemovidas,
       assuntosPorDisciplina: assuntosPorDisciplina
     });
+  } else if(chave === LS_PLANEJAMENTO){
+    chamarNuvem("salvarDadoNuvem", "planejamento", planejamento);
   }
 }
 
@@ -682,6 +876,7 @@ let disciplinasRemovidas = [];
 let assuntosPorDisciplina = {};
 let horasList = [];
 let anotacoesList = [];
+let planejamento = null;
 let activeTimer = null;
 let timerInterval = null;
 let disciplinaCallerSelect = null;
@@ -787,6 +982,8 @@ function sanitizeRichText(html){
           const limpo = limparEstiloSpan(attr.value);
           if(limpo){ child.setAttribute("style", limpo); }
           else { child.removeAttribute("style"); }
+        } else if(child.tagName === "DIV" && attr.name === "class" && attr.value === "juri-bloco"){
+          // Preserva o bloco de jurisprudência — único atributo class permitido em divs
         } else {
           child.removeAttribute(attr.name);
         }
@@ -833,9 +1030,22 @@ function getAssuntosDe(disciplina){
 }
 
 /* ====================== COR FIXA POR DISCIPLINA ======================== */
+// Mapeamento fixo para disciplinas que colidiriam pelo hash automático.
+// Qualquer disciplina fora deste mapa continua usando o hash da paleta abaixo.
+const MAPA_CORES_DISCIPLINAS = {
+  "Auditoria":                "#DC2626",
+  "Direito Civil":            "#9F1239",
+  "Direito Processual Civil": "#7C3AED",
+  "Estatística":              "#D97706",
+  "Direito Previdenciário":   "#A16207",
+  "Controle Externo":         "#C2410C"
+};
+
 const PALETA_DISCIPLINAS = [
-  "#0E6B63","#2563EB","#DC2626","#EA580C","#B9842A","#16A34A","#7C3AED","#DB2777",
-  "#0891B2","#65A30D","#9333EA","#0D9488","#C2410C","#4338CA","#BE123C","#15803D"
+  "#DC2626","#9F1239","#E11D48","#DB2777","#C026D3",
+  "#7C3AED","#4338CA","#1D4ED8","#0284C7","#0E7490",
+  "#0F766E","#15803D","#65A30D","#A16207","#D97706",
+  "#EA580C","#C2410C","#92400E"
 ];
 function hashTexto(str){
   let hash = 0;
@@ -843,7 +1053,7 @@ function hashTexto(str){
   return Math.abs(hash);
 }
 function corDaDisciplina(disciplina){
-  return PALETA_DISCIPLINAS[hashTexto(disciplina) % PALETA_DISCIPLINAS.length];
+  return MAPA_CORES_DISCIPLINAS[disciplina] || PALETA_DISCIPLINAS[hashTexto(disciplina) % PALETA_DISCIPLINAS.length];
 }
 function hexParaRgba(hex, alpha){
   const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
@@ -1097,6 +1307,7 @@ document.querySelectorAll(".tab-btn").forEach(btn=>{
     btn.classList.add("active");
     document.getElementById("painelHoras").classList.add("hidden");
     document.getElementById("painelAnotacoes").classList.add("hidden");
+    document.getElementById("painelPlanejamento").classList.add("hidden");
     document.getElementById(btn.dataset.tab).classList.remove("hidden");
     atualizarVisibilidadeTimerFlutuante();
   });
@@ -1789,6 +2000,48 @@ document.querySelectorAll(".rte-emoji-btn").forEach(btn=>{
     try{ document.execCommand("insertText", false, btn.dataset.emoji); }catch(e){ console.error(e); }
   });
 });
+
+document.getElementById("btnJurisprudencia").addEventListener("click", ()=>{
+  const editor = document.getElementById("anotacaoTexto");
+  editor.focus();
+  const selecao = window.getSelection();
+
+  // Verifica se a seleção está dentro de um bloco de jurisprudência já existente
+  function encontrarBlocoJuri(node){
+    let el = node && node.nodeType === Node.ELEMENT_NODE ? node : node && node.parentElement;
+    while(el && editor.contains(el)){
+      if(el.classList && el.classList.contains("juri-bloco")) return el;
+      el = el.parentElement;
+    }
+    return null;
+  }
+
+  const blocoExistente = selecao && selecao.rangeCount > 0
+    ? encontrarBlocoJuri(selecao.anchorNode) : null;
+
+  if(blocoExistente){
+    // Já é bloco de jurisprudência: remove o bloco e mantém o conteúdo interno
+    const range = document.createRange();
+    range.selectNode(blocoExistente);
+    selecao.removeAllRanges();
+    selecao.addRange(range);
+    try{ document.execCommand("insertHTML", false, blocoExistente.innerHTML); }catch(e){ console.error(e); }
+    return;
+  }
+
+  // Aplica o bloco: envolve a seleção atual num div.juri-bloco
+  if(!selecao || selecao.rangeCount === 0 || selecao.isCollapsed || !editor.contains(selecao.anchorNode)){
+    alert("Selecione o texto da jurisprudência antes de clicar no botão ⚖.");
+    return;
+  }
+  const range = selecao.getRangeAt(0);
+  const container = document.createElement("div");
+  container.appendChild(range.cloneContents());
+  try{
+    document.execCommand("insertHTML", false,
+      '<div class="juri-bloco">'+container.innerHTML+'</div>');
+  }catch(e){ console.error(e); }
+});
 document.querySelectorAll(".rte-btn[data-fontsize-px]").forEach(btn=>{
   btn.addEventListener("click", ()=> aplicarTamanhoFonteSelecao(btn.dataset.fontsizePx));
 });
@@ -2221,6 +2474,245 @@ document.addEventListener("keydown", e=>{
   if(e.key === "Escape") fecharLightbox();
 });
 
+/* ============================ PLANEJAMENTO ============================ */
+function carregarPlanejamento(){
+  const raw = localStorage.getItem(LS_PLANEJAMENTO);
+  if(raw){
+    try{ planejamento = JSON.parse(raw); }
+    catch(e){ planejamento = JSON.parse(JSON.stringify(PLANEJAMENTO_DEFAULT)); }
+  } else {
+    planejamento = JSON.parse(JSON.stringify(PLANEJAMENTO_DEFAULT));
+  }
+}
+
+function salvarPlanejamento(){
+  salvarNoLocalStorage(LS_PLANEJAMENTO, planejamento);
+}
+
+function renderPlanejamento(){
+  renderProgresso();
+  renderCronograma();
+  renderProva();
+}
+
+// --- Progresso ---
+function renderProgresso(){
+  const tbody = document.getElementById("planProgressoTbody");
+  if(!tbody || !planejamento) return;
+  tbody.innerHTML = planejamento.progresso.map((row, idx)=>{
+    const cor = corDaDisciplina(row.d);
+    const pct = row.t > 0 ? Math.min(100, row.r / row.t * 100) : 0;
+    return `<tr>
+      <td><input class="plan-field-input" style="color:${cor};font-weight:600"
+           value="${escapeHtml(row.d)}"
+           data-plan="p" data-idx="${idx}" data-f="d"
+           onchange="planCelula(this)" oninput="planCelula(this)"></td>
+      <td style="text-align:right"><input class="plan-field-input plan-num-input" type="number" min="0"
+           value="${row.t}"
+           data-plan="p" data-idx="${idx}" data-f="t"
+           onchange="planCelula(this)" oninput="planCelula(this)"></td>
+      <td style="text-align:right"><input class="plan-field-input plan-num-input" type="number" min="0"
+           value="${row.r}"
+           data-plan="p" data-idx="${idx}" data-f="r"
+           onchange="planCelula(this)" oninput="planCelula(this)"></td>
+      <td><div class="plan-pct-cell">
+        <div class="plan-bar-wrap"><div class="plan-bar plan-bar-${idx}" style="width:${pct.toFixed(1)}%"></div></div>
+        <span class="plan-pct-text-${idx}">${pct.toFixed(1)}%</span>
+      </div></td>
+      <td><button type="button" class="plan-btn-del" onclick="planRemoverProgresso(${idx})" title="Remover">✕</button></td>
+    </tr>`;
+  }).join("");
+  planAtualizarTotaisProgresso();
+  document.getElementById("btnPlanAdicionarProgressoLinha").onclick = planAdicionarProgressoLinha;
+}
+
+function planAtualizarTotaisProgresso(){
+  if(!planejamento) return;
+  const totalT = planejamento.progresso.reduce((s,r)=>s+(Number(r.t)||0),0);
+  const totalR = planejamento.progresso.reduce((s,r)=>s+(Number(r.r)||0),0);
+  const pct = totalT > 0 ? (totalR/totalT*100).toFixed(1) : "0.0";
+  const tEl = document.getElementById("planTotalT");
+  const rEl = document.getElementById("planTotalR");
+  const pEl = document.getElementById("planTotalPct");
+  if(tEl) tEl.textContent = totalT.toLocaleString("pt-BR");
+  if(rEl) rEl.textContent = totalR.toLocaleString("pt-BR");
+  if(pEl) pEl.innerHTML = `<div class="plan-bar-wrap"><div class="plan-bar" style="width:${Math.min(100,Number(pct)).toFixed(1)}%"></div></div><span>${pct}%</span>`;
+}
+
+function planAdicionarProgressoLinha(){
+  if(!planejamento) return;
+  planejamento.progresso.push({d:"Nova disciplina",t:0,r:0});
+  salvarPlanejamento();
+  renderProgresso();
+}
+
+function planRemoverProgresso(idx){
+  if(!planejamento) return;
+  if(!confirm("Remover esta linha?")) return;
+  planejamento.progresso.splice(idx,1);
+  salvarPlanejamento();
+  renderProgresso();
+}
+
+// --- Cronograma ---
+function renderCronograma(){
+  const container = document.getElementById("planCronogramaGrid");
+  if(!container || !planejamento) return;
+  const crono = planejamento.cronograma;
+
+  // Extrai o nome da disciplina removendo a quantidade entre parênteses no final.
+  // Ex: "Direito Tributário (20)" → "Direito Tributário"
+  function nomeDaDisciplinaLinha(linha){
+    return linha.replace(/\s*\([^)]*\)\s*$/, "").trim();
+  }
+
+  // Monta o HTML de exibição colorida de um valor de célula (pode ter múltiplas linhas).
+  function htmlExibicao(val){
+    const linhas = val.split("\n").map(l=>l.trim()).filter(Boolean);
+    if(!linhas.length)
+      return '<span style="color:var(--ink-faint);font-size:10px;font-style:italic">—</span>';
+    return linhas.map(l=>{
+      const nome = nomeDaDisciplinaLinha(l);
+      const cor = nome ? corDaDisciplina(nome) : "var(--ink-soft)";
+      return `<span style="color:${cor};display:block;font-size:10.5px;line-height:1.45;font-weight:600">${escapeHtml(l)}</span>`;
+    }).join("");
+  }
+
+  container.innerHTML = DIAS_SEMANA_PLAN.map((dia, di)=>{
+    const blocos = crono.slots.map((slot, si)=>{
+      const val = (crono.celulas[si] && crono.celulas[si][di] != null)
+        ? crono.celulas[si][di] : "";
+      return `<div class="crono-card-bloco">
+        <span class="crono-card-num">${si+1}.</span>
+        <div class="crono-bloco-display" data-si="${si}" data-di="${di}"
+             onclick="planAbrirEdicaoCreno(this)" title="Clique para editar">${htmlExibicao(val)}</div>
+        <textarea class="crono-bloco-editor hidden" data-si="${si}" data-di="${di}"
+                  rows="2" onblur="planSalvarCelulaCreno(this)">${escapeHtml(val)}</textarea>
+      </div>`;
+    }).join("");
+    const ehFds = (di === 5 || di === 6);
+    return `<div class="crono-card${ehFds ? " crono-card-fds" : ""}">
+      <div class="crono-card-titulo">${dia}</div>
+      ${blocos}
+    </div>`;
+  }).join("");
+
+  document.getElementById("btnPlanAdicionarSlot").onclick = planAdicionarSlot;
+  document.getElementById("btnPlanRemoverSlot").onclick = planRemoverUltimoSlot;
+}
+
+function planAbrirEdicaoCreno(displayEl){
+  const editor = displayEl.nextElementSibling;
+  displayEl.classList.add("hidden");
+  editor.classList.remove("hidden");
+  editor.focus();
+}
+
+function planSalvarCelulaCreno(editor){
+  const si = parseInt(editor.dataset.si);
+  const di = parseInt(editor.dataset.di);
+  if(!planejamento.cronograma.celulas[si]) planejamento.cronograma.celulas[si] = new Array(7).fill("");
+  planejamento.cronograma.celulas[si][di] = editor.value;
+  salvarPlanejamento();
+  renderCronograma();
+}
+
+function planAdicionarSlot(){
+  if(!planejamento) return;
+  planejamento.cronograma.slots.push("Novo bloco");
+  planejamento.cronograma.celulas.push(new Array(7).fill(""));
+  salvarPlanejamento();
+  renderCronograma();
+}
+
+function planRemoverUltimoSlot(){
+  if(!planejamento || planejamento.cronograma.slots.length < 2) return;
+  if(!confirm("Remover o último bloco do cronograma?")) return;
+  planejamento.cronograma.slots.pop();
+  planejamento.cronograma.celulas.pop();
+  salvarPlanejamento();
+  renderCronograma();
+}
+
+// --- Prova ---
+function renderProva(){
+  const tbody = document.getElementById("planProvaTbody");
+  if(!tbody || !planejamento) return;
+  tbody.innerHTML = planejamento.prova.map((row, idx)=>{
+    const cor = corDaDisciplina(row.m);
+    return `<tr>
+      <td><input class="plan-field-input" style="color:${cor};font-weight:600"
+           value="${escapeHtml(row.m)}"
+           data-plan="v" data-idx="${idx}" data-f="m"
+           onchange="planCelula(this)" oninput="planCelula(this)"></td>
+      <td style="text-align:right"><input class="plan-field-input plan-num-input" type="number" min="0"
+           value="${row.q}"
+           data-plan="v" data-idx="${idx}" data-f="q"
+           onchange="planCelula(this)" oninput="planCelula(this)"></td>
+      <td><button type="button" class="plan-btn-del" onclick="planRemoverProva(${idx})" title="Remover">✕</button></td>
+    </tr>`;
+  }).join("");
+  planAtualizarTotalProva();
+  document.getElementById("btnPlanAdicionarProvaLinha").onclick = planAdicionarProvaLinha;
+}
+
+function planAtualizarTotalProva(){
+  if(!planejamento) return;
+  const totalQ = planejamento.prova.reduce((s,r)=>s+(Number(r.q)||0),0);
+  const el = document.getElementById("planTotalQ");
+  if(el) el.textContent = totalQ;
+}
+
+function planAdicionarProvaLinha(){
+  if(!planejamento) return;
+  planejamento.prova.push({m:"Nova matéria",q:0});
+  salvarPlanejamento();
+  renderProva();
+}
+
+function planRemoverProva(idx){
+  if(!planejamento) return;
+  if(!confirm("Remover esta linha?")) return;
+  planejamento.prova.splice(idx,1);
+  salvarPlanejamento();
+  renderProva();
+}
+
+// --- Handlers de edição ---
+// Chamado pelos inputs das tabelas de Progresso e Prova
+function planCelula(el){
+  if(!planejamento) return;
+  const plan = el.dataset.plan;
+  const idx = parseInt(el.dataset.idx);
+  const f = el.dataset.f;
+  if(plan === "p"){ // progresso
+    if(f === "d"){
+      planejamento.progresso[idx].d = el.value;
+      el.style.color = corDaDisciplina(el.value);
+    } else {
+      const val = Math.max(0, parseInt(el.value)||0);
+      planejamento.progresso[idx][f] = val;
+      const row = planejamento.progresso[idx];
+      const pct = row.t > 0 ? Math.min(100, row.r/row.t*100) : 0;
+      const barEl = document.querySelector(`.plan-bar-${idx}`);
+      const pctEl = document.querySelector(`.plan-pct-text-${idx}`);
+      if(barEl) barEl.style.width = pct.toFixed(1)+"%";
+      if(pctEl) pctEl.textContent = pct.toFixed(1)+"%";
+      planAtualizarTotaisProgresso();
+    }
+  } else if(plan === "v"){ // prova
+    if(f === "m"){
+      planejamento.prova[idx].m = el.value;
+      el.style.color = corDaDisciplina(el.value);
+    } else {
+      planejamento.prova[idx].q = Math.max(0, parseInt(el.value)||0);
+      planAtualizarTotalProva();
+    }
+  }
+  salvarPlanejamento();
+}
+
+// Chamado pelos textareas do cronograma
 /* ============================ INICIALIZAÇÃO ============================ */
 let appJaIniciado = false;
 function iniciarApp(){
@@ -2231,9 +2723,11 @@ function iniciarApp(){
   popularTodosSelects();
   horasList = carregarDoLocalStorage(LS_HORAS, []);
   anotacoesList = carregarDoLocalStorage(LS_ANOTACOES, []);
+  carregarPlanejamento();
   renderHoras();
   renderCalendario();
   renderAnotacoes();
+  renderPlanejamento();
   restaurarTimerSalvo();
 }
 
@@ -2267,6 +2761,14 @@ function aplicarConfigDaNuvem(config){
 window.aplicarHorasDaNuvem = aplicarHorasDaNuvem;
 window.aplicarAnotacoesDaNuvem = aplicarAnotacoesDaNuvem;
 window.aplicarConfigDaNuvem = aplicarConfigDaNuvem;
+
+function aplicarPlanejamentoDaNuvem(dados){
+  if(!dados) return;
+  planejamento = dados;
+  salvarNoLocalStorageSemSincronizar(LS_PLANEJAMENTO, planejamento);
+  renderPlanejamento();
+}
+window.aplicarPlanejamentoDaNuvem = aplicarPlanejamentoDaNuvem;
 // Expõe para o ambiente de testes (smoke_test.js injeta fotos diretamente)
 Object.defineProperty(window, "fotosExistentes", {
   get(){ return fotosExistentes; },
@@ -2372,6 +2874,12 @@ window.renderizarPreviewFotos = renderizarPreviewFotos;
       const config = snap.exists() ? (snap.data().conteudo || {}) : {};
       if(typeof window.aplicarConfigDaNuvem === "function") window.aplicarConfigDaNuvem(config);
     }, e=> console.error("Erro ao escutar configurações na nuvem:", e)));
+
+    cancelarEscutas.push(onSnapshot(refDado(uid, "planejamento"), snap=>{
+      if(snap.exists() && typeof window.aplicarPlanejamentoDaNuvem === "function"){
+        window.aplicarPlanejamentoDaNuvem(snap.data().conteudo || null);
+      }
+    }, e=> console.error("Erro ao escutar planejamento na nuvem:", e)));
   }
   function pararEscutaNuvem(){
     cancelarEscutas.forEach(cancelar=> cancelar());
