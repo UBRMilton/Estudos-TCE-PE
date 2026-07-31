@@ -340,6 +340,41 @@
   /* ---- Painel Planejamento ---- */
   .plan-bloco{margin-bottom:28px;}
   .plan-bloco-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px;}
+  .plan-toggle-header{cursor:pointer;padding:8px 10px;margin:-8px -10px 10px;border-radius:var(--radius);user-select:none;}
+  .plan-toggle-header:hover{background:var(--surface-2);}
+  .plan-toggle-header h2{pointer-events:none;}
+  .plan-toggle-seta{font-size:10px;margin-right:5px;transition:transform .2s;display:inline-block;}
+  /* Banner de métricas — horizontal, acima da tabela, alinhado à direita */
+  .plan-banner-horiz{display:inline-flex;gap:1px;border-radius:10px;overflow:hidden;border:1px solid var(--line);}
+  .plan-banner-card{padding:10px 14px;background:var(--surface-2);display:flex;flex-direction:column;gap:2px;min-width:110px;}
+  .plan-banner-card-destaque{background:var(--accent-soft);}
+  .plan-banner-label{font-size:9px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+  .plan-banner-valor{font-size:22px;font-weight:700;color:var(--ink);font-family:var(--font-mono);font-feature-settings:"tnum" 1;line-height:1.1;}
+  .plan-banner-card-destaque .plan-banner-valor{color:var(--accent-dark);}
+  .plan-banner-sub{font-size:9.5px;color:var(--ink-soft);}
+  .plan-banner-bar-wrap{height:4px;background:var(--line);border-radius:2px;margin-top:3px;overflow:hidden;width:100%;}
+  .plan-banner-bar{height:100%;border-radius:2px;background:var(--accent);transition:width .3s;}
+  .plan-cal-titulo{font-size:10px;font-weight:600;color:var(--ink-soft);margin:10px 0 5px;text-transform:uppercase;letter-spacing:.04em;}
+  .plan-cal-legenda{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .plan-cal-legenda-item{display:flex;align-items:center;gap:3px;font-size:9px;color:var(--ink-faint);}
+  .plan-cal-legenda-dot{width:10px;height:10px;border-radius:2px;}
+  .plan-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;max-width:280px;}
+  .plan-cal-col-header{font-size:9px;color:var(--ink-faint);text-align:center;padding:1px 0;font-weight:500;}
+  .plan-cal-dia{border-radius:4px;padding:3px 2px;text-align:center;background:var(--surface-2);min-height:34px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid transparent;}
+  .plan-cal-dia.plan-cal-hoje{border-color:var(--accent);}
+  .plan-cal-dia.plan-cal-futuro{opacity:.3;}
+  .plan-cal-num{font-size:8px;color:var(--ink-faint);line-height:1;}
+  .plan-cal-val{font-size:9.5px;font-weight:700;line-height:1.2;margin-top:1px;}
+  .plan-cal-t0{background:var(--surface-2);}
+  .plan-cal-t0 .plan-cal-val{color:var(--ink-faint);}
+  .plan-cal-t1{background:#DCFCE7;}
+  .plan-cal-t1 .plan-cal-val{color:#166534;}
+  .plan-cal-t2{background:#86EFAC;}
+  .plan-cal-t2 .plan-cal-val{color:#14532D;}
+  .plan-cal-t3{background:#22C55E;}
+  .plan-cal-t3 .plan-cal-val{color:#fff;}
+  .plan-cal-t4{background:#15803D;}
+  .plan-cal-t4 .plan-cal-val{color:#fff;}
   .plan-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius);border:1px solid var(--line);}
   .plan-table{width:100%;border-collapse:collapse;font-size:12.5px;}
   .plan-table th{text-align:left;padding:7px 10px;font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border-bottom:1px solid var(--line);}
@@ -598,63 +633,101 @@
 
       <!-- Progresso por Disciplina -->
       <div class="plan-bloco">
-        <div class="plan-bloco-header">
-          <h2 class="section-title" style="margin:0">Progresso por Disciplina</h2>
+        <div class="plan-bloco-header plan-toggle-header" data-target="planProgressoCorpo">
+          <h2 class="section-title" style="margin:0">
+            <span class="plan-toggle-seta">▾</span> Progresso por Disciplina
+          </h2>
           <button type="button" class="btn btn-primary" style="font-size:11px;padding:4px 12px;" id="btnPlanAdicionarProgressoLinha">+ Disciplina</button>
         </div>
-        <div class="plan-table-wrap">
-          <table class="plan-table">
-            <thead><tr>
-              <th style="min-width:180px">Disciplina</th>
-              <th style="text-align:right;min-width:70px">Total</th>
-              <th style="text-align:right;min-width:80px">Resolvidas</th>
-              <th style="min-width:120px">Concluído</th>
-              <th style="width:26px"></th>
-            </tr></thead>
-            <tbody id="planProgressoTbody"></tbody>
-            <tfoot><tr>
-              <td class="plan-total-label">TOTAL</td>
-              <td id="planTotalT" style="text-align:right;font-family:var(--font-mono);font-feature-settings:'tnum' 1"></td>
-              <td id="planTotalR" style="text-align:right;font-family:var(--font-mono);font-feature-settings:'tnum' 1"></td>
-              <td id="planTotalPct" class="plan-pct-cell"></td>
-              <td></td>
-            </tr></tfoot>
-          </table>
+        <div id="planProgressoCorpo">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+            <div id="planBanner" class="plan-banner-horiz">
+              <div class="plan-banner-card">
+                <span class="plan-banner-label">Questões restantes</span>
+                <span class="plan-banner-valor" id="planBannerRestam">—</span>
+                <span class="plan-banner-sub" id="planBannerRestamSub"></span>
+              </div>
+              <div class="plan-banner-card plan-banner-card-destaque">
+                <span class="plan-banner-label">Meta diária</span>
+                <span class="plan-banner-valor" id="planBannerMeta">—</span>
+                <span class="plan-banner-sub">questões/dia até 26/08</span>
+              </div>
+              <div class="plan-banner-card">
+                <span class="plan-banner-label">Feitas hoje</span>
+                <span class="plan-banner-valor" id="planBannerHoje">0</span>
+                <div class="plan-banner-bar-wrap"><div class="plan-banner-bar" id="planBannerBar" style="width:0%"></div></div>
+                <span class="plan-banner-sub" id="planBannerHojeSub"></span>
+              </div>
+            </div>
+          </div>
+          <div class="plan-table-wrap">
+            <table class="plan-table">
+              <thead><tr>
+                <th style="min-width:180px">Disciplina</th>
+                <th style="text-align:right;min-width:60px">Total</th>
+                <th style="text-align:right;min-width:75px">Resolvidas</th>
+                <th style="text-align:right;min-width:65px">Restam</th>
+                <th style="text-align:right;min-width:70px" id="planMetaDiaTh">Meta/dia</th>
+                <th style="min-width:110px">Concluído</th>
+                <th style="width:26px"></th>
+              </tr></thead>
+              <tbody id="planProgressoTbody"></tbody>
+              <tfoot><tr>
+                <td class="plan-total-label">TOTAL</td>
+                <td id="planTotalT" style="text-align:right;font-family:var(--font-mono);font-feature-settings:'tnum' 1"></td>
+                <td id="planTotalR" style="text-align:right;font-family:var(--font-mono);font-feature-settings:'tnum' 1"></td>
+                <td id="planTotalRestam" style="text-align:right;font-family:var(--font-mono);font-feature-settings:'tnum' 1"></td>
+                <td id="planTotalMeta" style="text-align:right;font-family:var(--font-mono);font-feature-settings:'tnum' 1;color:var(--accent-dark);font-weight:700"></td>
+                <td id="planTotalPct" class="plan-pct-cell"></td>
+                <td></td>
+              </tr></tfoot>
+            </table>
+          </div>
+          <!-- Calendário de agosto — abaixo da tabela -->
+          <div id="planCalendarioQuestoes" style="margin-top:14px"></div>
         </div>
       </div>
 
       <!-- Cronograma Semanal -->
       <div class="plan-bloco">
-        <div class="plan-bloco-header">
-          <h2 class="section-title" style="margin:0">Cronograma Semanal</h2>
+        <div class="plan-bloco-header plan-toggle-header" data-target="planCronogramaCorpo">
+          <h2 class="section-title" style="margin:0">
+            <span class="plan-toggle-seta">▾</span> Cronograma Semanal
+          </h2>
           <div style="display:flex;gap:6px">
             <button type="button" class="btn btn-secondary" style="font-size:11px;padding:4px 12px;" id="btnPlanRemoverSlot">− Bloco</button>
             <button type="button" class="btn btn-primary" style="font-size:11px;padding:4px 12px;" id="btnPlanAdicionarSlot">+ Bloco</button>
           </div>
         </div>
-        <div id="planCronogramaGrid" class="crono-grid"></div>
+        <div id="planCronogramaCorpo">
+          <div id="planCronogramaGrid" class="crono-grid"></div>
+        </div>
       </div>
 
       <!-- Distribuição na Prova -->
       <div class="plan-bloco">
-        <div class="plan-bloco-header">
-          <h2 class="section-title" style="margin:0">Distribuição na Prova</h2>
+        <div class="plan-bloco-header plan-toggle-header" data-target="planProvaCorpo">
+          <h2 class="section-title" style="margin:0">
+            <span class="plan-toggle-seta">▾</span> Distribuição na Prova
+          </h2>
           <button type="button" class="btn btn-primary" style="font-size:11px;padding:4px 12px;" id="btnPlanAdicionarProvaLinha">+ Matéria</button>
         </div>
-        <div class="plan-table-wrap" style="max-width:360px">
-          <table class="plan-table">
-            <thead><tr>
-              <th style="min-width:200px">Disciplina / Matéria</th>
-              <th style="text-align:right;min-width:80px">Questões</th>
-              <th style="width:26px"></th>
-            </tr></thead>
-            <tbody id="planProvaTbody"></tbody>
-            <tfoot><tr>
-              <td class="plan-total-label">TOTAL</td>
-              <td id="planTotalQ" style="text-align:right;font-family:var(--font-mono);font-feature-settings:'tnum' 1"></td>
-              <td></td>
-            </tr></tfoot>
-          </table>
+        <div id="planProvaCorpo">
+          <div class="plan-table-wrap" style="max-width:360px">
+            <table class="plan-table">
+              <thead><tr>
+                <th style="min-width:200px">Disciplina / Matéria</th>
+                <th style="text-align:right;min-width:80px">Questões</th>
+                <th style="width:26px"></th>
+              </tr></thead>
+              <tbody id="planProvaTbody"></tbody>
+              <tfoot><tr>
+                <td class="plan-total-label">TOTAL</td>
+                <td id="planTotalQ" style="text-align:right;font-family:var(--font-mono);font-feature-settings:'tnum' 1"></td>
+                <td></td>
+              </tr></tfoot>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -758,6 +831,8 @@ const LS_DISCIPLINAS = "tcepe_disciplinas_custom";
 const LS_DISCIPLINAS_REMOVIDAS = "tcepe_disciplinas_removidas";
 const LS_ASSUNTOS = "tcepe_assuntos_custom";
 const LS_PLANEJAMENTO = "tcepe_planejamento";
+const LS_BASELINE_QUESTOES = "tcepe_baseline_questoes"; // {data, resolvidas} — zera a cada novo dia
+const LS_HISTORICO_QUESTOES = "tcepe_historico_questoes"; // {YYYY-MM-DD: N} — questões feitas por dia
 const SEM_ASSUNTO = "Sem assunto específico";
 const DIAS_SEMANA_PLAN = ["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
 
@@ -867,8 +942,7 @@ function sincronizarChaveComNuvem(chave, valor){
     });
   } else if(chave === LS_PLANEJAMENTO){
     chamarNuvem("salvarDadoNuvem", "planejamento", planejamento);
-  }
-}
+  }}
 
 /* ============================== ESTADO =============================== */
 let customDisciplinas = [];
@@ -2493,15 +2567,178 @@ function renderPlanejamento(){
   renderProgresso();
   renderCronograma();
   renderProva();
+  inicializarTogglesPlanejamento();
+  atualizarBannerMetricas();
+}
+
+function inicializarTogglesPlanejamento(){
+  document.querySelectorAll(".plan-toggle-header").forEach(header=>{
+    // Clona para remover listeners duplicados de renders anteriores
+    const clone = header.cloneNode(true);
+    header.parentNode.replaceChild(clone, header);
+  });
+  document.querySelectorAll(".plan-toggle-header").forEach(header=>{
+    header.addEventListener("click", e=>{
+      if(e.target.closest("button")) return;
+      const corpo = document.getElementById(header.dataset.target);
+      if(!corpo) return;
+      const recolhido = corpo.style.display === "none";
+      corpo.style.display = recolhido ? "" : "none";
+      const seta = header.querySelector(".plan-toggle-seta");
+      if(seta) seta.style.transform = recolhido ? "" : "rotate(-90deg)";
+    });
+  });
+}
+
+// Data-alvo para cálculo da meta diária: 26 de agosto de 2026
+const META_DATA_ALVO = new Date(2026, 7, 26); // mês 7 = agosto (0-indexed)
+function diasRestantesParaMeta(){
+  const hoje = new Date();
+  const diff = META_DATA_ALVO - hoje;
+  return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}
+
+// Baseline diário: guarda quantas questões estavam resolvidas no início do dia.
+// "Feitas hoje" = total atual − baseline. Zera automaticamente quando muda o dia.
+function getTotalResolvidasAtual(){
+  if(!planejamento) return 0;
+  return planejamento.progresso.reduce((s,r)=>s+(Number(r.r)||0), 0);
+}
+function carregarHistoricoQuestoes(){
+  try{ const r=localStorage.getItem(LS_HISTORICO_QUESTOES); return r?JSON.parse(r):{}; }catch(e){ return {}; }
+}
+function salvarHistoricoQuestoes(data, quantidade){
+  try{
+    const hist = carregarHistoricoQuestoes();
+    hist[data] = quantidade;
+    localStorage.setItem(LS_HISTORICO_QUESTOES, JSON.stringify(hist));
+    chamarNuvem("salvarDadoNuvem","historico",hist);
+  }catch(e){}
+}
+function carregarBaselineHoje(){
+  try{
+    const raw = localStorage.getItem(LS_BASELINE_QUESTOES);
+    if(raw){
+      const obj = JSON.parse(raw);
+      if(obj.data === hojeISO()) return obj.resolvidas;
+      // Novo dia: salva o total de ontem no histórico antes de resetar
+      const feitasOntem = Math.max(0, getTotalResolvidasAtual() - obj.resolvidas);
+      salvarHistoricoQuestoes(obj.data, feitasOntem);
+    }
+  } catch(e){}
+  // Primeiro uso ou novo dia: usa estado atual como baseline (feitas hoje = 0)
+  const total = getTotalResolvidasAtual();
+  localStorage.setItem(LS_BASELINE_QUESTOES, JSON.stringify({data: hojeISO(), resolvidas: total}));
+  return total;
+}
+function getFeitasHoje(){
+  return Math.max(0, getTotalResolvidasAtual() - carregarBaselineHoje());
+}
+
+function atualizarBannerMetricas(){
+  const totalT = planejamento ? planejamento.progresso.reduce((s,r)=>s+(Number(r.t)||0),0) : 0;
+  const totalR = getTotalResolvidasAtual();
+  const restam = Math.max(0, totalT - totalR);
+  const dias = diasRestantesParaMeta();
+  const meta = restam > 0 ? Math.ceil(restam / dias) : 0;
+  const feitas = getFeitasHoje();
+  const pctHoje = meta > 0 ? Math.min(100, feitas / meta * 100) : (feitas > 0 ? 100 : 0);
+  const delta = feitas - meta;
+
+  const elRestam = document.getElementById("planBannerRestam");
+  const elRestamSub = document.getElementById("planBannerRestamSub");
+  const elMeta = document.getElementById("planBannerMeta");
+  const elHoje = document.getElementById("planBannerHoje");
+  const elBar = document.getElementById("planBannerBar");
+  const elHojeSub = document.getElementById("planBannerHojeSub");
+
+  if(elRestam) elRestam.textContent = restam.toLocaleString("pt-BR");
+  if(elRestamSub) elRestamSub.textContent = "de "+totalT.toLocaleString("pt-BR")+" no total";
+  if(elMeta) elMeta.textContent = meta > 0 ? meta : "✓";
+  if(elHoje) elHoje.textContent = feitas.toLocaleString("pt-BR");
+  if(elBar) elBar.style.width = pctHoje.toFixed(1)+"%";
+  if(elHojeSub){
+    if(meta === 0){
+      elHojeSub.innerHTML = '<span style="color:#15803D;font-weight:600">✓ meta atingida!</span>';
+    } else if(delta < 0){
+      elHojeSub.innerHTML = '<span style="color:#DC2626;font-weight:700">'+delta+'</span> para a meta';
+    } else if(delta > 0){
+      elHojeSub.innerHTML = '<span style="color:#15803D;font-weight:700">+'+delta+'</span> acima da meta';
+    } else {
+      elHojeSub.innerHTML = '<span style="color:#15803D;font-weight:700">✓ exatamente na meta!</span>';
+    }
+  }
+  renderCalendarioQuestoes();
+}
+
+function renderCalendarioQuestoes(){
+  const container = document.getElementById("planCalendarioQuestoes");
+  if(!container) return;
+  const hist = carregarHistoricoQuestoes();
+  const hojeStr = hojeISO();
+  const feitasHoje = getFeitasHoje();
+  const totalT = planejamento ? planejamento.progresso.reduce((s,r)=>s+(Number(r.t)||0),0) : 0;
+  const totalR = getTotalResolvidasAtual();
+  const restam = Math.max(0, totalT - totalR);
+  const dias = diasRestantesParaMeta();
+  const metaDiaria = restam > 0 ? Math.ceil(restam / dias) : 1;
+
+  // Agosto 2026: começa na sexta-feira (dia 1 = sábado — hoje é sexta 31/07)
+  // getDay(): 0=Dom, 1=Seg, ..., 6=Sáb
+  // Queremos grade Seg→Dom: offset = (getDay() + 6) % 7
+  const primeiroDia = new Date(2026, 7, 1).getDay();
+  const offset = (primeiroDia + 6) % 7; // Sáb → offset = 5
+
+  const cabecalho = ["S","T","Q","Q","S","S","D"].map(d=>
+    `<div class="plan-cal-col-header">${d}</div>`).join("");
+
+  let celulas = "";
+  for(let i=0;i<offset;i++) celulas += "<div></div>";
+  for(let d=1; d<=31; d++){
+    const dataStr = "2026-08-"+String(d).padStart(2,"0");
+    const ehHoje = dataStr === hojeStr;
+    const eFuturo = dataStr > hojeStr;
+    const feitas = ehHoje ? feitasHoje : (hist[dataStr] !== undefined ? hist[dataStr] : null);
+
+    let tier = "plan-cal-t0", valStr = "·";
+    if(!eFuturo && feitas !== null){
+      valStr = feitas > 0 ? feitas.toString() : "0";
+      if(feitas <= 0)        tier = "plan-cal-t0";
+      else if(feitas < 150)  tier = "plan-cal-t1";
+      else if(feitas < 250)  tier = "plan-cal-t2";
+      else if(feitas < 350)  tier = "plan-cal-t3";
+      else                   tier = "plan-cal-t4";
+    }
+    celulas += `<div class="plan-cal-dia ${tier}${ehHoje?" plan-cal-hoje":""}${eFuturo?" plan-cal-futuro":""}">
+      <div class="plan-cal-num">${d}</div>
+      <div class="plan-cal-val">${eFuturo?"":valStr}</div>
+    </div>`;
+  }
+
+  container.innerHTML =
+    '<div class="plan-cal-titulo">Agosto 2026 — questões por dia</div>'+
+    '<div class="plan-cal-legenda">'+
+      '<span class="plan-cal-legenda-item"><span class="plan-cal-legenda-dot plan-cal-t1"></span>1–149</span>'+
+      '<span class="plan-cal-legenda-item"><span class="plan-cal-legenda-dot plan-cal-t2"></span>150–249</span>'+
+      '<span class="plan-cal-legenda-item"><span class="plan-cal-legenda-dot plan-cal-t3"></span>250–349</span>'+
+      '<span class="plan-cal-legenda-item"><span class="plan-cal-legenda-dot plan-cal-t4"></span>350+</span>'+
+    '</div>'+
+    '<div class="plan-cal-grid">'+cabecalho+celulas+'</div>';
 }
 
 // --- Progresso ---
 function renderProgresso(){
   const tbody = document.getElementById("planProgressoTbody");
   if(!tbody || !planejamento) return;
+  const dias = diasRestantesParaMeta();
+  const thMeta = document.getElementById("planMetaDiaTh");
+  if(thMeta) thMeta.title = dias+" dias até 26/08/2026";
+
   tbody.innerHTML = planejamento.progresso.map((row, idx)=>{
     const cor = corDaDisciplina(row.d);
     const pct = row.t > 0 ? Math.min(100, row.r / row.t * 100) : 0;
+    const restam = Math.max(0, (Number(row.t)||0) - (Number(row.r)||0));
+    const meta = restam > 0 ? Math.ceil(restam / dias) : 0;
     return `<tr>
       <td><input class="plan-field-input" style="color:${cor};font-weight:600"
            value="${escapeHtml(row.d)}"
@@ -2515,6 +2752,8 @@ function renderProgresso(){
            value="${row.r}"
            data-plan="p" data-idx="${idx}" data-f="r"
            onchange="planCelula(this)" oninput="planCelula(this)"></td>
+      <td class="plan-num plan-restam-${idx}" style="font-family:var(--font-mono);font-feature-settings:'tnum' 1;text-align:right;color:${restam>0?'var(--ink-soft)':'var(--accent-dark)'}">${restam.toLocaleString("pt-BR")}</td>
+      <td class="plan-meta-${idx}" style="text-align:right;font-family:var(--font-mono);font-feature-settings:'tnum' 1;font-weight:${meta>0?'600':'400'};color:${meta>0?'var(--accent-dark)':'var(--ink-faint)'}">${meta > 0 ? meta : '✓'}</td>
       <td><div class="plan-pct-cell">
         <div class="plan-bar-wrap"><div class="plan-bar plan-bar-${idx}" style="width:${pct.toFixed(1)}%"></div></div>
         <span class="plan-pct-text-${idx}">${pct.toFixed(1)}%</span>
@@ -2530,13 +2769,21 @@ function planAtualizarTotaisProgresso(){
   if(!planejamento) return;
   const totalT = planejamento.progresso.reduce((s,r)=>s+(Number(r.t)||0),0);
   const totalR = planejamento.progresso.reduce((s,r)=>s+(Number(r.r)||0),0);
+  const totalRestam = Math.max(0, totalT - totalR);
+  const dias = diasRestantesParaMeta();
+  const totalMeta = totalRestam > 0 ? Math.ceil(totalRestam / dias) : 0;
   const pct = totalT > 0 ? (totalR/totalT*100).toFixed(1) : "0.0";
   const tEl = document.getElementById("planTotalT");
   const rEl = document.getElementById("planTotalR");
+  const reEl = document.getElementById("planTotalRestam");
+  const mEl = document.getElementById("planTotalMeta");
   const pEl = document.getElementById("planTotalPct");
   if(tEl) tEl.textContent = totalT.toLocaleString("pt-BR");
   if(rEl) rEl.textContent = totalR.toLocaleString("pt-BR");
+  if(reEl) reEl.textContent = totalRestam.toLocaleString("pt-BR");
+  if(mEl) mEl.textContent = totalMeta > 0 ? totalMeta : "✓";
   if(pEl) pEl.innerHTML = `<div class="plan-bar-wrap"><div class="plan-bar" style="width:${Math.min(100,Number(pct)).toFixed(1)}%"></div></div><span>${pct}%</span>`;
+  atualizarBannerMetricas();
 }
 
 function planAdicionarProgressoLinha(){
@@ -2694,10 +2941,17 @@ function planCelula(el){
       planejamento.progresso[idx][f] = val;
       const row = planejamento.progresso[idx];
       const pct = row.t > 0 ? Math.min(100, row.r/row.t*100) : 0;
+      const restam = Math.max(0, (Number(row.t)||0) - (Number(row.r)||0));
+      const dias = diasRestantesParaMeta();
+      const meta = restam > 0 ? Math.ceil(restam / dias) : 0;
       const barEl = document.querySelector(`.plan-bar-${idx}`);
       const pctEl = document.querySelector(`.plan-pct-text-${idx}`);
+      const reEl = document.querySelector(`.plan-restam-${idx}`);
+      const mEl = document.querySelector(`.plan-meta-${idx}`);
       if(barEl) barEl.style.width = pct.toFixed(1)+"%";
       if(pctEl) pctEl.textContent = pct.toFixed(1)+"%";
+      if(reEl){ reEl.textContent = restam.toLocaleString("pt-BR"); reEl.style.color = restam>0?"var(--ink-soft)":"var(--accent-dark)"; }
+      if(mEl){ mEl.textContent = meta>0?meta:"✓"; mEl.style.color = meta>0?"var(--accent-dark)":"var(--ink-faint)"; mEl.style.fontWeight = meta>0?"600":"400"; }
       planAtualizarTotaisProgresso();
     }
   } else if(plan === "v"){ // prova
@@ -2769,6 +3023,13 @@ function aplicarPlanejamentoDaNuvem(dados){
   renderPlanejamento();
 }
 window.aplicarPlanejamentoDaNuvem = aplicarPlanejamentoDaNuvem;
+
+function aplicarHistoricoQuestoesDaNuvem(dados){
+  if(!dados) return;
+  try{ localStorage.setItem(LS_HISTORICO_QUESTOES, JSON.stringify(dados)); }catch(e){}
+  renderCalendarioQuestoes();
+}
+window.aplicarHistoricoQuestoesDaNuvem = aplicarHistoricoQuestoesDaNuvem;
 // Expõe para o ambiente de testes (smoke_test.js injeta fotos diretamente)
 Object.defineProperty(window, "fotosExistentes", {
   get(){ return fotosExistentes; },
@@ -2880,6 +3141,12 @@ window.renderizarPreviewFotos = renderizarPreviewFotos;
         window.aplicarPlanejamentoDaNuvem(snap.data().conteudo || null);
       }
     }, e=> console.error("Erro ao escutar planejamento na nuvem:", e)));
+
+    cancelarEscutas.push(onSnapshot(refDado(uid, "historico"), snap=>{
+      if(snap.exists() && typeof window.aplicarHistoricoQuestoesDaNuvem === "function"){
+        window.aplicarHistoricoQuestoesDaNuvem(snap.data().conteudo || null);
+      }
+    }, e=> console.error("Erro ao escutar histórico de questões na nuvem:", e)));
   }
   function pararEscutaNuvem(){
     cancelarEscutas.forEach(cancelar=> cancelar());
