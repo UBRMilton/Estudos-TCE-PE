@@ -2078,14 +2078,33 @@ document.getElementById("fotoInput").addEventListener("change", e=>{
 });
 
 document.querySelectorAll(".rte-btn, .rte-swatch, .rte-mark").forEach(btn=>{
-  btn.addEventListener("mousedown", e=> e.preventDefault());
+  btn.addEventListener("mousedown", e=>{
+    e.preventDefault();
+    // Salva a seleção atual antes que o clique possa deslocá-la
+    const sel = window.getSelection();
+    if(sel && sel.rangeCount > 0) _rangeSalvo = sel.getRangeAt(0).cloneRange();
+  });
 });
+let _rangeSalvo = null;
+
 function focarEditorComEstiloCSS(){
   const editor = document.getElementById("anotacaoTexto");
   editor.focus();
   // Garante que negrito/cor/marcador sejam aplicados com <span style> em vez da tag <font>,
   // que o sanitizador descarta (era a causa da cor não aparecer depois de salvar).
   try{ document.execCommand("styleWithCSS", false, true); }catch(e){}
+}
+
+// Restaura o range salvo no mousedown, garantindo que a seleção não seja perdida
+// ao clicar num botão da barra de formatação.
+function restaurarSelecaoSalva(editor){
+  if(_rangeSalvo && editor.contains(_rangeSalvo.commonAncestorContainer)){
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(_rangeSalvo);
+    return sel;
+  }
+  return window.getSelection();
 }
 document.querySelectorAll(".rte-btn[data-cmd]").forEach(btn=>{
   btn.addEventListener("click", ()=>{
@@ -2103,10 +2122,7 @@ document.querySelectorAll(".rte-emoji-btn").forEach(btn=>{
 
 document.getElementById("btnJurisprudencia").addEventListener("click", ()=>{
   const editor = document.getElementById("anotacaoTexto");
-  editor.focus();
-  const selecao = window.getSelection();
-
-  // Verifica se a seleção está dentro de um bloco de jurisprudência já existente
+  const selecao = restaurarSelecaoSalva(editor);
   function encontrarBlocoJuri(node){
     let el = node && node.nodeType === Node.ELEMENT_NODE ? node : node && node.parentElement;
     while(el && editor.contains(el)){
@@ -2115,12 +2131,9 @@ document.getElementById("btnJurisprudencia").addEventListener("click", ()=>{
     }
     return null;
   }
-
   const blocoExistente = selecao && selecao.rangeCount > 0
     ? encontrarBlocoJuri(selecao.anchorNode) : null;
-
   if(blocoExistente){
-    // Já é bloco de jurisprudência: remove o bloco e mantém o conteúdo interno
     const range = document.createRange();
     range.selectNode(blocoExistente);
     selecao.removeAllRanges();
@@ -2128,8 +2141,6 @@ document.getElementById("btnJurisprudencia").addEventListener("click", ()=>{
     try{ document.execCommand("insertHTML", false, blocoExistente.innerHTML); }catch(e){ console.error(e); }
     return;
   }
-
-  // Aplica o bloco: envolve a seleção atual num div.juri-bloco
   if(!selecao || selecao.rangeCount === 0 || selecao.isCollapsed || !editor.contains(selecao.anchorNode)){
     alert("Selecione o texto da jurisprudência antes de clicar no botão ⚖.");
     return;
@@ -2138,16 +2149,14 @@ document.getElementById("btnJurisprudencia").addEventListener("click", ()=>{
   const container = document.createElement("div");
   container.appendChild(range.cloneContents());
   try{
-    document.execCommand("insertHTML", false,
-      '<div class="juri-bloco">'+container.innerHTML+'</div>');
+    document.execCommand("insertHTML", false, '<div class="juri-bloco">'+container.innerHTML+'</div>');
   }catch(e){ console.error(e); }
 });
 
-// Botão § — Literalidade: mesma lógica do ⚖, mas aplica literal-bloco
+// Botão § — Literalidade
 document.getElementById("btnLiteralidade").addEventListener("click", ()=>{
   const editor = document.getElementById("anotacaoTexto");
-  editor.focus();
-  const selecao = window.getSelection();
+  const selecao = restaurarSelecaoSalva(editor);
   function encontrarBlocoLiteral(node){
     let el = node && node.nodeType === Node.ELEMENT_NODE ? node : node && node.parentElement;
     while(el && editor.contains(el)){
@@ -2174,8 +2183,7 @@ document.getElementById("btnLiteralidade").addEventListener("click", ()=>{
   const container = document.createElement("div");
   container.appendChild(range.cloneContents());
   try{
-    document.execCommand("insertHTML", false,
-      '<div class="literal-bloco">'+container.innerHTML+'</div>');
+    document.execCommand("insertHTML", false, '<div class="literal-bloco">'+container.innerHTML+'</div>');
   }catch(e){ console.error(e); }
 });
 document.querySelectorAll(".rte-btn[data-fontsize-px]").forEach(btn=>{
