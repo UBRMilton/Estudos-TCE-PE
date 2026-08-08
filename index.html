@@ -208,8 +208,8 @@
   .rte-literal-btn{font-size:15px;width:28px;height:25px;font-weight:700;}
   .rte-literal-btn.active{background:#EFF6FF;color:#1D4ED8;}
   /* Bloco de colunas — usa tabela internamente para que Enter não escape da coluna */
-  .dupla-col-table{width:100%;border-collapse:separate;border-spacing:12px 0;margin:6px 0;}
-  .dupla-col-cell{vertical-align:top;padding:8px 10px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);}
+  .dupla-col-table{width:100%;border-collapse:separate;border-spacing:12px 0;margin:6px 0;table-layout:fixed;}
+  .dupla-col-cell{vertical-align:top;padding:8px 10px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);word-break:break-word;overflow-wrap:break-word;}
   .dupla-col-cell > *:first-child{margin-top:0;}
   .dupla-col-cell > *:last-child{margin-bottom:0;}
   /* Dropdown do botão de colunas */
