@@ -207,6 +207,15 @@
   .rte-juri-btn.active{background:var(--gold-soft);color:var(--gold);}
   .rte-literal-btn{font-size:15px;width:28px;height:25px;font-weight:700;}
   .rte-literal-btn.active{background:#EFF6FF;color:#1D4ED8;}
+  /* Bloco de duas/três colunas */
+  .dupla-col{display:flex;gap:20px;margin:6px 0;}
+  .dupla-col-item{flex:1;min-width:0;padding:8px 10px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);}
+  /* Dropdown do botão de colunas */
+  .rte-col-wrap{position:relative;display:inline-block;}
+  .rte-col-menu{position:absolute;top:calc(100% + 4px);left:0;z-index:200;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow-card);padding:4px;min-width:130px;display:flex;flex-direction:column;gap:2px;}
+  .rte-col-menu.hidden{display:none;}
+  .rte-col-opcao{background:transparent;border:none;text-align:left;padding:6px 10px;font-size:12px;color:var(--ink);border-radius:5px;cursor:pointer;white-space:nowrap;}
+  .rte-col-opcao:hover{background:var(--surface-2);}
   /* Bloco de literalidade — exibido no editor e no sumário */
   .literal-bloco{
     border-left:3px solid #1D4ED8;
@@ -336,8 +345,14 @@
 
   /* ---------- Lightbox ---------- */
   .lightbox{position:fixed;inset:0;background:rgba(15,20,24,.88);display:flex;align-items:center;justify-content:center;z-index:80;padding:24px;}
-  .lightbox img{max-width:92vw;max-height:88vh;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.4);}
-  .lightbox-close{position:absolute;top:16px;right:20px;background:none;border:none;color:#fff;font-size:26px;line-height:1;}
+  .lightbox img{max-width:82vw;max-height:88vh;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.4);}
+  .lightbox-close{position:absolute;top:16px;right:20px;background:none;border:none;color:#fff;font-size:26px;line-height:1;cursor:pointer;}
+  .lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:42px;line-height:1;width:50px;height:70px;cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+  .lightbox-nav:hover{background:rgba(255,255,255,.28);}
+  .lightbox-prev{left:12px;}
+  .lightbox-next{right:12px;}
+  .lightbox-nav.hidden{display:none;}
+  .lightbox-contador{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.7);font-size:12px;font-family:var(--font-mono);background:rgba(0,0,0,.3);padding:3px 10px;border-radius:20px;}
 
   /* ---------- Modais (nova disciplina / novo assunto) ---------- */
   .modal-overlay{position:fixed;inset:0;background:rgba(15,20,24,.5);display:flex;align-items:center;justify-content:center;z-index:80;padding:18px;}
@@ -601,8 +616,6 @@
             <button type="button" class="rte-btn" data-cmd="italic" title="Itálico"><i>I</i></button>
             <button type="button" class="rte-btn" data-cmd="underline" title="Sublinhado"><u>S</u></button>
             <span class="rte-sep"></span>
-            <button type="button" class="rte-btn" data-fontsize-px="10px" title="Diminuir / voltar ao tamanho normal (selecione o texto antes)"><span style="font-size:9.5px">A</span></button>
-            <span class="rte-sep"></span>
             <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Lista com marcadores">•—</button>
             <span class="rte-sep"></span>
             <div class="rte-colors">
@@ -638,6 +651,14 @@
             <span class="rte-sep"></span>
             <button type="button" class="rte-btn rte-juri-btn" id="btnJurisprudencia" title="Bloco de jurisprudência (selecione o texto antes)">⚖</button>
             <button type="button" class="rte-btn rte-literal-btn" id="btnLiteralidade" title="Bloco de literalidade — texto literal de lei (selecione o texto antes)">§</button>
+            <span class="rte-sep"></span>
+            <div class="rte-col-wrap">
+              <button type="button" class="rte-btn" id="btnDuplaColuna" title="Inserir colunas" style="font-size:13px;width:28px">⊟</button>
+              <div class="rte-col-menu hidden" id="menuColunas">
+                <button type="button" class="rte-col-opcao" data-colunas="2">⊟ 2 colunas</button>
+                <button type="button" class="rte-col-opcao" data-colunas="3">⊟⊟ 3 colunas</button>
+              </div>
+            </div>
           </div>
           <div id="anotacaoTexto" class="rte-editor" contenteditable="true" data-placeholder="Escreva aqui o seu comentário sobre a questão..."></div>
         </div>
@@ -764,7 +785,10 @@
 <!-- ===================== LIGHTBOX ===================== -->
 <div id="lightbox" class="lightbox hidden">
   <button class="lightbox-close" id="lightboxClose">&times;</button>
+  <button class="lightbox-nav lightbox-prev" id="lightboxPrev">&#8249;</button>
   <img id="lightboxImg" alt="Foto ampliada da questão">
+  <button class="lightbox-nav lightbox-next" id="lightboxNext">&#8250;</button>
+  <div class="lightbox-contador" id="lightboxContador"></div>
 </div>
 
 <!-- ===================== MODAL NOVA DISCIPLINA ===================== -->
@@ -1082,8 +1106,8 @@ function sanitizeRichText(html){
           const limpo = limparEstiloSpan(attr.value);
           if(limpo){ child.setAttribute("style", limpo); }
           else { child.removeAttribute("style"); }
-        } else if(child.tagName === "DIV" && attr.name === "class" && (attr.value === "juri-bloco" || attr.value === "literal-bloco")){
-          // Preserva blocos de jurisprudência e literalidade
+        } else if(child.tagName === "DIV" && attr.name === "class" && (attr.value === "juri-bloco" || attr.value === "literal-bloco" || attr.value === "dupla-col" || attr.value === "dupla-col-item")){
+          // Preserva blocos especiais de formatação
         } else {
           child.removeAttribute(attr.name);
         }
@@ -2186,8 +2210,32 @@ document.getElementById("btnLiteralidade").addEventListener("click", ()=>{
     document.execCommand("insertHTML", false, '<div class="literal-bloco">'+container.innerHTML+'</div>');
   }catch(e){ console.error(e); }
 });
-document.querySelectorAll(".rte-btn[data-fontsize-px]").forEach(btn=>{
-  btn.addEventListener("click", ()=> aplicarTamanhoFonteSelecao(btn.dataset.fontsizePx));
+// Botão ⊟ — Colunas: mostra menu com opção de 2 ou 3 colunas
+document.getElementById("btnDuplaColuna").addEventListener("mousedown", e=> e.preventDefault());
+document.getElementById("btnDuplaColuna").addEventListener("click", e=>{
+  e.stopPropagation();
+  const menu = document.getElementById("menuColunas");
+  menu.classList.toggle("hidden");
+});
+document.querySelectorAll(".rte-col-opcao").forEach(btn=>{
+  btn.addEventListener("mousedown", e=> e.preventDefault());
+  btn.addEventListener("click", e=>{
+    e.stopPropagation();
+    document.getElementById("menuColunas").classList.add("hidden");
+    const n = parseInt(btn.dataset.colunas) || 2;
+    const editor = document.getElementById("anotacaoTexto");
+    editor.focus();
+    const colunas = Array.from({length: n}, (_,i)=>
+      '<div class="dupla-col-item"><p>Coluna '+(i+1)+'</p></div>'
+    ).join("");
+    try{ document.execCommand("insertHTML", false, '<div class="dupla-col">'+colunas+'</div><p></p>'); }
+    catch(er){ console.error(er); }
+  });
+});
+// Fecha o menu ao clicar fora
+document.addEventListener("click", ()=>{
+  const menu = document.getElementById("menuColunas");
+  if(menu) menu.classList.add("hidden");
 });
 // Botão de tamanho de letra funciona como alternador: se o início da seleção já está
 // dentro de um span com esse tamanho reduzido, a ação é desfazer (voltar ao normal);
@@ -2602,21 +2650,73 @@ function imprimirDisciplina(disciplina){
 }
 
 /* ============================== LIGHTBOX ================================ */
+let _lightboxFotos = [];
+let _lightboxIdx = 0;
+
 function abrirLightbox(url){
-  document.getElementById("lightboxImg").src = url;
+  // Coleta todas as fotos visíveis na tela no momento do clique
+  _lightboxFotos = Array.from(document.querySelectorAll("[data-lightbox]")).map(el=>el.dataset.lightbox);
+  _lightboxIdx = _lightboxFotos.indexOf(url);
+  if(_lightboxIdx === -1){ _lightboxFotos = [url]; _lightboxIdx = 0; }
+  _mostrarFotoLightbox();
   document.getElementById("lightbox").classList.remove("hidden");
 }
+
+function _mostrarFotoLightbox(){
+  const url = _lightboxFotos[_lightboxIdx];
+  document.getElementById("lightboxImg").src = url;
+  const total = _lightboxFotos.length;
+  const contador = document.getElementById("lightboxContador");
+  if(contador) contador.textContent = total > 1 ? (_lightboxIdx+1)+" / "+total : "";
+  const prev = document.getElementById("lightboxPrev");
+  const next = document.getElementById("lightboxNext");
+  if(prev) prev.classList.toggle("hidden", total <= 1);
+  if(next) next.classList.toggle("hidden", total <= 1);
+}
+
+function _lightboxAnterior(){
+  if(_lightboxFotos.length <= 1) return;
+  _lightboxIdx = (_lightboxIdx - 1 + _lightboxFotos.length) % _lightboxFotos.length;
+  _mostrarFotoLightbox();
+}
+function _lightboxProximo(){
+  if(_lightboxFotos.length <= 1) return;
+  _lightboxIdx = (_lightboxIdx + 1) % _lightboxFotos.length;
+  _mostrarFotoLightbox();
+}
+
 function fecharLightbox(){
   document.getElementById("lightbox").classList.add("hidden");
   document.getElementById("lightboxImg").src = "";
+  _lightboxFotos = [];
 }
+
 document.getElementById("lightboxClose").addEventListener("click", fecharLightbox);
+document.getElementById("lightboxPrev").addEventListener("click", e=>{ e.stopPropagation(); _lightboxAnterior(); });
+document.getElementById("lightboxNext").addEventListener("click", e=>{ e.stopPropagation(); _lightboxProximo(); });
 document.getElementById("lightbox").addEventListener("click", e=>{
-  if(e.target.id === "lightbox") fecharLightbox();
+  if(e.target.id === "lightbox" || e.target.id === "lightboxImg") fecharLightbox();
 });
 document.addEventListener("keydown", e=>{
+  if(document.getElementById("lightbox").classList.contains("hidden")) return;
   if(e.key === "Escape") fecharLightbox();
+  if(e.key === "ArrowLeft") _lightboxAnterior();
+  if(e.key === "ArrowRight") _lightboxProximo();
 });
+
+// Suporte a swipe (mobile/tablet): deslizar para o lado passa para a próxima foto
+(function(){
+  let touchX = null;
+  const lb = document.getElementById("lightbox");
+  lb.addEventListener("touchstart", e=>{ touchX = e.touches[0].clientX; }, {passive:true});
+  lb.addEventListener("touchend", e=>{
+    if(touchX === null) return;
+    const delta = e.changedTouches[0].clientX - touchX;
+    touchX = null;
+    if(Math.abs(delta) < 40) return; // swipe muito pequeno — ignora
+    if(delta < 0) _lightboxProximo(); else _lightboxAnterior();
+  }, {passive:true});
+})();
 
 /* ============================ PLANEJAMENTO ============================ */
 function carregarPlanejamento(){
