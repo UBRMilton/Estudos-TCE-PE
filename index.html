@@ -207,9 +207,11 @@
   .rte-juri-btn.active{background:var(--gold-soft);color:var(--gold);}
   .rte-literal-btn{font-size:15px;width:28px;height:25px;font-weight:700;}
   .rte-literal-btn.active{background:#EFF6FF;color:#1D4ED8;}
-  /* Bloco de duas/três colunas */
-  .dupla-col{display:flex;gap:20px;margin:6px 0;}
-  .dupla-col-item{flex:1;min-width:0;padding:8px 10px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);}
+  /* Bloco de colunas — usa tabela internamente para que Enter não escape da coluna */
+  .dupla-col-table{width:100%;border-collapse:separate;border-spacing:12px 0;margin:6px 0;}
+  .dupla-col-cell{vertical-align:top;padding:8px 10px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);}
+  .dupla-col-cell > *:first-child{margin-top:0;}
+  .dupla-col-cell > *:last-child{margin-bottom:0;}
   /* Dropdown do botão de colunas */
   .rte-col-wrap{position:relative;display:inline-block;}
   .rte-col-menu{position:absolute;top:calc(100% + 4px);left:0;z-index:200;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow-card);padding:4px;min-width:130px;display:flex;flex-direction:column;gap:2px;}
@@ -1044,7 +1046,7 @@ function escapeHtml(str){
   return div.innerHTML;
 }
 
-const RTE_TAGS_PERMITIDAS = new Set(["B","STRONG","I","EM","U","SPAN","BR","DIV","P","UL","OL","LI"]);
+const RTE_TAGS_PERMITIDAS = new Set(["B","STRONG","I","EM","U","SPAN","BR","DIV","P","UL","OL","LI","TABLE","TBODY","TR","TD"]);
 
 // Mapeamento dos tamanhos legados do execCommand("fontSize") (escala antiga de 1 a 7),
 // mantido apenas como rede de segurança para o caso de algum texto colado de fora trazer
@@ -1107,7 +1109,11 @@ function sanitizeRichText(html){
           if(limpo){ child.setAttribute("style", limpo); }
           else { child.removeAttribute("style"); }
         } else if(child.tagName === "DIV" && attr.name === "class" && (attr.value === "juri-bloco" || attr.value === "literal-bloco" || attr.value === "dupla-col" || attr.value === "dupla-col-item")){
-          // Preserva blocos especiais de formatação
+          // Preserva blocos especiais de formatação (inclui formato legado dupla-col para compatibilidade)
+        } else if(child.tagName === "TABLE" && attr.name === "class" && attr.value === "dupla-col-table"){
+          // Preserva tabela de colunas
+        } else if(child.tagName === "TD" && attr.name === "class" && attr.value === "dupla-col-cell"){
+          // Preserva célula de coluna
         } else {
           child.removeAttribute(attr.name);
         }
@@ -2225,10 +2231,11 @@ document.querySelectorAll(".rte-col-opcao").forEach(btn=>{
     const n = parseInt(btn.dataset.colunas) || 2;
     const editor = document.getElementById("anotacaoTexto");
     editor.focus();
-    const colunas = Array.from({length: n}, (_,i)=>
-      '<div class="dupla-col-item"><p>Coluna '+(i+1)+'</p></div>'
+    const celulas = Array.from({length: n}, (_,i)=>
+      '<td class="dupla-col-cell"><p>Coluna '+(i+1)+'</p></td>'
     ).join("");
-    try{ document.execCommand("insertHTML", false, '<div class="dupla-col">'+colunas+'</div><p></p>'); }
+    const html = '<table class="dupla-col-table"><tbody><tr>'+celulas+'</tr></tbody></table><p></p>';
+    try{ document.execCommand("insertHTML", false, html); }
     catch(er){ console.error(er); }
   });
 });
