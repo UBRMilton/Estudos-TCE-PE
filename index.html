@@ -193,7 +193,7 @@
   }
 
   /* ---------- Editor de texto formatado ---------- */
-  .rte-toolbar{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:5px;}
+  .rte-toolbar{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:5px;position:sticky;top:0;z-index:50;background:var(--surface);padding:5px 4px;margin:-5px -4px 5px;border-radius:6px 6px 0 0;}
   .rte-btn{width:25px;height:25px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink);font-size:10px;line-height:1;}
   .rte-btn:hover{background:var(--surface-2);}
   .rte-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);}
@@ -202,7 +202,6 @@
   .rte-swatch{width:16px;height:16px;border-radius:50%;border:1px solid var(--line);padding:0;transition:transform .1s;}
   .rte-swatch:hover{transform:scale(1.18);}
   .rte-emojis{display:flex;align-items:center;gap:4px;}
-  .rte-emoji-btn{font-size:14px;width:28px;height:25px;}
   .rte-juri-btn{font-size:14px;width:28px;height:25px;font-weight:700;}
   .rte-juri-btn.active{background:var(--gold-soft);color:var(--gold);}
   .rte-literal-btn{font-size:15px;width:28px;height:25px;font-weight:700;}
@@ -329,6 +328,10 @@
   .sumario-item:hover{background:var(--surface-2);}
   .sumario-item:first-child{border-top:none;}
   .sumario-item.arrastando{opacity:.35;}
+  .sumario-item.fixado{border-left:3px solid var(--gold);padding-left:6px;}
+  .sumario-item.fixado+.sumario-item:not(.fixado){border-top:2px solid var(--line);margin-top:4px;}
+  .btn-fixar{background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px;opacity:.3;line-height:1;flex-shrink:0;transition:opacity .15s;}
+  .btn-fixar:hover,.btn-fixar.ativo{opacity:1;}
   .drag-handle{cursor:grab;color:var(--ink-faint);font-size:13px;line-height:1.7;flex-shrink:0;user-select:none;}
   .drag-handle:active{cursor:grabbing;}
   .sumario-item-conteudo{flex:1;font-size:13px;line-height:1.65;min-width:0;}
@@ -378,7 +381,19 @@
   .timer-flutuante-tempo{font-family:var(--font-mono); font-feature-settings:"tnum" 1; font-size:17px; font-weight:600; color:var(--ink); line-height:1.25;}
   .timer-flutuante-btn{flex-shrink:0; border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink-soft); font-size:11px; padding:4px 10px; cursor:pointer; white-space:nowrap;}
   .timer-flutuante-btn:hover{background:var(--surface-2);}
-  /* ---- Painel Planejamento ---- */
+  /* ---- Aba Resumos ---- */
+  .resumo-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+  .resumo-editor-panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:18px;}
+  .resumo-titulo-input{width:100%;border:none;border-bottom:2px solid var(--line);background:transparent;font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--ink);padding:4px 0 6px;margin-bottom:10px;outline:none;}
+  .resumo-titulo-input:focus{border-bottom-color:var(--accent);}
+  .resumo-topico-card{border:1px solid var(--line);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;}
+  .resumo-topico-header{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;background:var(--surface-2);user-select:none;}
+  .resumo-topico-header:hover{background:var(--line);}
+  .resumo-topico-seta{font-size:10px;color:var(--ink-faint);transition:transform .18s;}
+  .resumo-topico-titulo{flex:1;font-size:13px;font-weight:600;color:var(--ink);}
+  .resumo-topico-acoes{display:flex;gap:4px;}
+  .resumo-topico-conteudo{padding:12px 16px;display:none;font-size:13px;line-height:1.65;}
+  .resumo-topico-conteudo.aberto{display:block;}
   .plan-bloco{margin-bottom:28px;}
   .plan-bloco-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px;}
   .plan-toggle-header{cursor:pointer;padding:8px 10px;margin:-8px -10px 10px;border-radius:var(--radius);user-select:none;}
@@ -781,6 +796,7 @@
       </div>
 
     </section>
+
   </main>
 </div>
 
@@ -2382,8 +2398,9 @@ function montarItemSumario(a){
   const linkEl = linksArr.map((l,i)=>
     '<a class="sumario-item-link" href="'+escapeHtml(l)+'" target="_blank" rel="noopener noreferrer">🔗 '+(linksArr.length > 1 ? "Link "+(i+1) : "Ver questão")+'</a>'
   ).join(" ");
-  return '<li class="sumario-item" draggable="true" data-id="'+a.id+'">'+
+  return '<li class="sumario-item'+(a.fixado?' fixado':'')+'" draggable="true" data-id="'+a.id+'">'+
       '<span class="drag-handle" title="Arraste para reordenar">⋮⋮</span>'+
+      '<button type="button" class="btn-fixar'+(a.fixado?' ativo':'')+'" data-fixar="'+a.id+'" title="'+(a.fixado?'Desafixar':'Fixar no topo')+'">📌</button>'+
       '<div class="sumario-item-conteudo">'+texto+linkEl+fotosEl+'</div>'+
       '<div class="sumario-item-acoes">'+
         '<div class="mover-col">'+
@@ -2422,10 +2439,14 @@ function renderSumarioAnotacoes(lista){
     presentes.forEach(s=>{ if(!ordenado.includes(s)) ordenado.push(s); });
     porDisciplina[d].ordem = ordenado;
   });
-  // Ordena os itens de cada grupo pela chave de ordenação manual (ou data de criação, por padrão)
+  // Ordena os itens de cada grupo: fixadas primeiro, depois pela chave de ordenação manual
   ordemDisciplinas.forEach(d=>{
     porDisciplina[d].ordem.forEach(s=>{
-      porDisciplina[d].grupos[s].sort((a,b)=>chaveOrdenacao(a)-chaveOrdenacao(b));
+      porDisciplina[d].grupos[s].sort((a,b)=>{
+        if(a.fixado && !b.fixado) return -1;
+        if(!a.fixado && b.fixado) return 1;
+        return chaveOrdenacao(a)-chaveOrdenacao(b);
+      });
     });
   });
 
@@ -2593,6 +2614,15 @@ function conectarAcoesDaLista(container){
   });
   container.querySelectorAll("[data-edit-nota]").forEach(btn=>{
     btn.addEventListener("click", ()=> iniciarEdicaoAnotacao(btn.dataset.editNota));
+  });
+  container.querySelectorAll("[data-fixar]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const item = anotacoesList.find(a=>a.id === btn.dataset.fixar);
+      if(!item) return;
+      item.fixado = !item.fixado;
+      salvarNoLocalStorage(LS_ANOTACOES, anotacoesList);
+      renderAnotacoes();
+    });
   });
   container.querySelectorAll("[data-del-nota]").forEach(btn=>{
     btn.addEventListener("click", ()=>{
@@ -3361,6 +3391,7 @@ window.renderizarPreviewFotos = renderizarPreviewFotos;
         window.aplicarHistoricoQuestoesDaNuvem(snap.data().conteudo || null);
       }
     }, e=> console.error("Erro ao escutar histórico de questões na nuvem:", e)));
+
   }
   function pararEscutaNuvem(){
     cancelarEscutas.forEach(cancelar=> cancelar());
