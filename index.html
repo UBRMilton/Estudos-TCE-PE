@@ -2493,6 +2493,7 @@ function renderSumarioAnotacoes(lista){
           '<span class="sumario-contagem">'+totalDisciplina+'</span>'+
         '</button>'+
         '<button type="button" class="sumario-print-btn" data-print-disciplina="'+escapeHtml(disciplina)+'" title="Imprimir / salvar em PDF">🖨️</button>'+
+        '<button type="button" class="sumario-print-btn" data-word-disciplina="'+escapeHtml(disciplina)+'" title="Baixar como Word (.docx)">📄</button>'+
       '</div>'+
       '<div class="sumario-corpo">'+corpoHtml+'</div>';
     container.appendChild(grupoEl);
@@ -2522,6 +2523,9 @@ function renderSumarioAnotacoes(lista){
   });
   container.querySelectorAll(".sumario-print-btn").forEach(btn=>{
     btn.addEventListener("click", ()=> imprimirDisciplina(btn.dataset.printDisciplina));
+  });
+  container.querySelectorAll("[data-word-disciplina]").forEach(btn=>{
+    btn.addEventListener("click", ()=> exportarWordDisciplina(btn.dataset.wordDisciplina));
   });
   conectarAcoesDaLista(container);
   conectarReordenacao(container);
@@ -2684,6 +2688,89 @@ function imprimirDisciplina(disciplina){
     '<div class="impressao-meta">Estudos TCE-PE — '+itens.length+' anotação(ões) — gerado em '+new Date().toLocaleString("pt-BR")+'</div>'+
     corpoHtml;
   window.print();
+}
+
+/* ============================== EXPORTAR WORD ========================= */
+function exportarWordDisciplina(disciplina){
+  const itens = anotacoesList.filter(a=>a.disciplina === disciplina);
+  if(!itens.length){
+    alert("Não há anotações nesta disciplina para exportar.");
+    return;
+  }
+  const grupos = {};
+  const ordem = [];
+  itens.slice().sort((a,b)=>a.criadoEm-b.criadoEm).forEach(a=>{
+    const s = a.assunto || SEM_ASSUNTO;
+    if(!grupos[s]){ grupos[s] = []; ordem.push(s); }
+    grupos[s].push(a);
+  });
+  const usaAssuntos = !(ordem.length === 1 && ordem[0] === SEM_ASSUNTO);
+
+  function montarItemWord(a){
+    const texto = a.texto ? sanitizeRichText(a.texto) : "";
+    const linksArr = Array.isArray(a.links) ? a.links : (a.link ? [a.link] : []);
+    const linkHtml = linksArr.map(l=>'<p style="font-size:10pt;color:#555">🔗 <a href="'+escapeHtml(l)+'">'+escapeHtml(l)+'</a></p>').join("");
+    return '<div style="margin-bottom:14pt;page-break-inside:avoid">'+
+      '<p style="font-size:9pt;color:#777;margin:0 0 4pt">'+new Date(a.criadoEm).toLocaleDateString("pt-BR")+'</p>'+
+      '<div style="font-size:11pt;line-height:1.55">'+texto+'</div>'+
+      linkHtml+
+    '</div>';
+  }
+
+  let corpo;
+  if(usaAssuntos){
+    corpo = ordem.map(assunto=>
+      '<h2 style="font-size:13pt;font-family:Georgia,serif;margin:18pt 0 6pt;border-bottom:1pt solid #ccc;padding-bottom:3pt">'+
+        escapeHtml(assunto)+'</h2>'+
+      grupos[assunto].map(montarItemWord).join("")
+    ).join("");
+  } else {
+    corpo = grupos[SEM_ASSUNTO].map(montarItemWord).join("");
+  }
+
+  const html = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="UTF-8">
+<title>${escapeHtml(disciplina)}</title>
+<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml><![endif]-->
+<style>
+  body{font-family:Calibri,sans-serif;font-size:11pt;color:#1a1a1a;margin:2.5cm;}
+  h1{font-family:Georgia,serif;font-size:18pt;margin:0 0 4pt}
+  h2{font-family:Georgia,serif;font-size:13pt;margin:18pt 0 6pt;border-bottom:1pt solid #ccc;padding-bottom:3pt}
+  p{margin:0 0 6pt}
+  ul,ol{margin:4pt 0;padding-left:20pt}
+  li{margin-bottom:3pt}
+  /* Blocos especiais */
+  .juri-bloco{border-left:3pt solid #B9842A;background:#FFFBF2;padding:6pt 10pt;margin:8pt 0;font-style:italic}
+  .juri-bloco::before{content:"⚖ JURISPRUDÊNCIA";display:block;font-size:9pt;font-weight:bold;font-style:normal;color:#B9842A;margin-bottom:4pt}
+  .literal-bloco{border-left:3pt solid #1D4ED8;background:#EFF6FF;padding:6pt 10pt;margin:8pt 0;font-family:Courier New,monospace;font-size:10pt}
+  .literal-bloco::before{content:"§ LITERALIDADE";display:block;font-size:9pt;font-weight:bold;font-family:Calibri,sans-serif;color:#1D4ED8;margin-bottom:4pt}
+  .dupla-col-table{width:100%;border-collapse:separate;border-spacing:8pt 0}
+  .dupla-col-cell{vertical-align:top;padding:6pt 8pt;border:1pt solid #ddd}
+</style>
+</head>
+<body>
+<h1>${escapeHtml(disciplina)}</h1>
+<p style="font-size:10pt;color:#666;border-bottom:1pt solid #ccc;padding-bottom:6pt;margin-bottom:16pt">
+  Estudos TCE-PE &mdash; ${itens.length} anotação(ões) &mdash; ${new Date().toLocaleString("pt-BR")}
+</p>
+${corpo}
+</body>
+</html>`;
+
+  // Cria o blob com BOM (necessário para o Word reconhecer a codificação UTF-8)
+  const blob = new Blob(["\uFEFF"+html], {type:"application/msword"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = disciplina.replace(/[^a-zA-Z0-9À-ÿ\s]/g,"_")+".doc";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 /* ============================== LIGHTBOX ================================ */
