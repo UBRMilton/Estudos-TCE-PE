@@ -493,6 +493,7 @@
     #areaImpressao h2{font-family:var(--font-display);font-size:13px;margin:14px 0 6px;border-bottom:1px solid #ccc;padding-bottom:3px;}
     #areaImpressao .impressao-meta{font-size:10.5px;color:#555;margin-bottom:16px;border-bottom:1px solid #ccc;padding-bottom:9px;}
     #areaImpressao .impressao-item{margin-bottom:14px;page-break-inside:avoid;}
+    #areaImpressao .impressao-num{font-size:9px;font-weight:700;color:#B9842A;letter-spacing:.08em;margin-bottom:2px;}
     #areaImpressao .impressao-data{font-size:9.5px;color:#777;font-family:var(--font-mono);font-feature-settings:"tnum" 1;margin-bottom:3px;}
     #areaImpressao .impressao-link{font-size:10.5px;color:#555;margin-top:3px;}
     #areaImpressao .impressao-texto{font-size:12.5px;line-height:1.5;}
@@ -2663,12 +2664,15 @@ function imprimirDisciplina(disciplina){
   });
   const usaAssuntos = !(ordem.length === 1 && ordem[0] === SEM_ASSUNTO);
 
+  let contador = 0;
   function montarItemImpresso(a){
+    contador++;
     const texto = a.texto ? '<div class="impressao-texto">'+sanitizeRichText(a.texto)+'</div>' : "";
     const linkHtml = a.link ? '<div class="impressao-link">Link: '+escapeHtml(a.link)+'</div>' : "";
     const fotosImpArr = Array.isArray(a.fotos) && a.fotos.length ? a.fotos : (a.fotoUrl ? [a.fotoUrl] : []);
     const foto = fotosImpArr.map(url=>'<img class="impressao-foto" src="'+url+'">').join("");
     return '<div class="impressao-item">'+
+        '<div class="impressao-num">#'+contador+'</div>'+
         '<div class="impressao-data">'+new Date(a.criadoEm).toLocaleDateString("pt-BR")+'</div>'+
         texto + linkHtml + foto +
       '</div>';
@@ -2706,11 +2710,14 @@ function exportarWordDisciplina(disciplina){
   });
   const usaAssuntos = !(ordem.length === 1 && ordem[0] === SEM_ASSUNTO);
 
+  let contadorW = 0;
   function montarItemWord(a){
+    contadorW++;
     const texto = a.texto ? sanitizeRichText(a.texto) : "";
     const linksArr = Array.isArray(a.links) ? a.links : (a.link ? [a.link] : []);
     const linkHtml = linksArr.map(l=>'<p style="font-size:10pt;color:#555">🔗 <a href="'+escapeHtml(l)+'">'+escapeHtml(l)+'</a></p>').join("");
     return '<div style="margin-bottom:14pt;page-break-inside:avoid">'+
+      '<p style="font-size:9pt;font-weight:bold;color:#B9842A;margin:0 0 2pt;letter-spacing:.05em">#'+contadorW+'</p>'+
       '<p style="font-size:9pt;color:#777;margin:0 0 4pt">'+new Date(a.criadoEm).toLocaleDateString("pt-BR")+'</p>'+
       '<div style="font-size:11pt;line-height:1.55">'+texto+'</div>'+
       linkHtml+
