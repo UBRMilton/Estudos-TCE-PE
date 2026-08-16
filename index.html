@@ -2160,6 +2160,14 @@ document.querySelectorAll(".rte-btn[data-cmd]").forEach(btn=>{
     atualizarEstadoToolbar();
   });
 });
+// Cola sempre como texto simples no editor de anotações,
+// eliminando tamanhos de fonte, estilos e formatações de origem.
+document.getElementById("anotacaoTexto").addEventListener("paste", e=>{
+  e.preventDefault();
+  const texto = (e.clipboardData || window.clipboardData).getData("text/plain");
+  if(texto) document.execCommand("insertText", false, texto);
+});
+
 document.querySelectorAll(".rte-emoji-btn").forEach(btn=>{
   btn.addEventListener("click", ()=>{
     focarEditorComEstiloCSS();
