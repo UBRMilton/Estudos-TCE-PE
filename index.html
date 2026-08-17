@@ -456,17 +456,47 @@
   .plan-crono-cell{width:100%;min-height:52px;padding:6px 8px;border:none;background:transparent;resize:none;font:inherit;font-size:11.5px;line-height:1.5;color:var(--ink);box-sizing:border-box;display:block;}
   .plan-crono-cell:focus{outline:none;background:var(--accent-soft);}
   /* Opção C: cards por dia */
-  .crono-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
-  @media(min-width:640px){.crono-grid{grid-template-columns:repeat(4,1fr);}}
+  .crono-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .crono-card{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius);padding:10px;}
+  .crono-card-fds{border-color:var(--accent-soft);background:var(--accent-soft);}
+  .crono-card-titulo{font-size:11.5px;font-weight:700;color:var(--ink);margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--line);}
+  .crono-card-fds .crono-card-titulo{color:var(--accent-dark);}
+  .crono-card-bloco{display:flex;align-items:flex-start;gap:5px;margin-bottom:5px;}
+  .crono-card-num{font-size:9.5px;font-weight:600;color:var(--ink-faint);min-width:14px;flex-shrink:0;margin-top:3px;}
+  .crono-bloco-chips{display:flex;flex-wrap:wrap;gap:4px;align-items:center;flex:1;min-width:0;}
+  .crono-chip{display:inline-flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:2px 6px 2px 8px;font-size:10.5px;}
+  .crono-chip-q{font-weight:400;color:var(--ink-soft);font-size:9.5px;}
+  .crono-chip-del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:12px;padding:0;line-height:1;flex-shrink:0;}
+  .crono-chip-del:hover{color:var(--danger);}
+  .crono-add-btn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:transparent;border:1.5px dashed var(--line);color:var(--ink-faint);cursor:pointer;font-size:14px;font-weight:700;flex-shrink:0;}
+  .crono-add-btn:hover{background:var(--accent-soft);color:var(--accent);border-color:var(--accent);}
+  .crono-picker{display:flex;align-items:center;gap:5px;padding:5px 7px;background:var(--surface);border:1.5px solid var(--accent);border-radius:7px;margin-top:5px;flex-wrap:wrap;width:100%;}
+  .crono-picker select{font:inherit;font-size:11px;border:1px solid var(--line);border-radius:4px;padding:3px 5px;flex:1;min-width:120px;}
+  .crono-picker input[type=number]{width:52px;font:inherit;font-size:11px;border:1px solid var(--line);border-radius:4px;padding:3px 5px;text-align:center;}
+  .crono-picker-ok{font-size:11px;padding:3px 9px;border-radius:4px;border:1px solid var(--accent);color:var(--accent);background:transparent;cursor:pointer;font-weight:600;}
+  .crono-picker-ok:hover{background:var(--accent-soft);}
+  .crono-picker-cancel{font-size:11px;padding:3px 7px;border-radius:4px;border:1px solid var(--line);background:transparent;cursor:pointer;color:var(--ink-soft);}
+  .crono-picker-cancel:hover{background:var(--danger-soft);}
   .crono-card{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius);padding:10px;}
   .crono-card-fds{border-color:var(--accent-soft);background:var(--accent-soft);}
   .crono-card-titulo{font-size:11.5px;font-weight:700;color:var(--ink);margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--line);}
   .crono-card-fds .crono-card-titulo{color:var(--accent-dark);}
   .crono-card-bloco{display:flex;align-items:baseline;gap:5px;margin-bottom:4px;}
-  .crono-card-num{font-size:9.5px;font-weight:600;color:var(--ink-faint);min-width:14px;flex-shrink:0;}
-  .crono-bloco-display{flex:1;min-width:0;cursor:pointer;padding:1px 3px;border-radius:3px;}
-  .crono-bloco-display:hover{background:var(--surface);}
-  .crono-bloco-editor{flex:1;min-width:0;border:none;background:var(--surface);font:inherit;font-size:11px;color:var(--ink);outline:none;padding:2px 4px;border-radius:3px;resize:none;box-shadow:0 0 0 1.5px var(--accent);}
+  .crono-card-num{font-size:9.5px;font-weight:600;color:var(--ink-faint);min-width:14px;flex-shrink:0;margin-top:3px;}
+  .crono-bloco-chips{display:flex;flex-wrap:wrap;gap:4px;align-items:center;flex:1;min-width:0;}
+  .crono-chip{display:inline-flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:2px 6px 2px 8px;font-size:10.5px;}
+  .crono-chip-q{font-weight:400;color:var(--ink-soft);font-size:9.5px;}
+  .crono-chip-del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:12px;padding:0;line-height:1;flex-shrink:0;}
+  .crono-chip-del:hover{color:var(--danger);}
+  .crono-add-btn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:transparent;border:1.5px dashed var(--line);color:var(--ink-faint);cursor:pointer;font-size:14px;font-weight:700;flex-shrink:0;}
+  .crono-add-btn:hover{background:var(--accent-soft);color:var(--accent);border-color:var(--accent);}
+  .crono-picker{display:flex;align-items:center;gap:5px;padding:5px 7px;background:var(--surface);border:1.5px solid var(--accent);border-radius:7px;margin-top:5px;flex-wrap:wrap;width:100%;}
+  .crono-picker select{font:inherit;font-size:11px;border:1px solid var(--line);border-radius:4px;padding:3px 5px;flex:1;min-width:120px;}
+  .crono-picker input[type=number]{width:52px;font:inherit;font-size:11px;border:1px solid var(--line);border-radius:4px;padding:3px 5px;text-align:center;}
+  .crono-picker-ok{font-size:11px;padding:3px 9px;border-radius:4px;border:1px solid var(--accent);color:var(--accent);background:transparent;cursor:pointer;font-weight:600;}
+  .crono-picker-ok:hover{background:var(--accent-soft);}
+  .crono-picker-cancel{font-size:11px;padding:3px 7px;border-radius:4px;border:1px solid var(--line);background:transparent;cursor:pointer;color:var(--ink-soft);}
+  .crono-picker-cancel:hover{background:var(--danger-soft);}
   .plan-btn-del{width:20px;height:20px;border-radius:4px;background:transparent;border:none;color:var(--ink-faint);cursor:pointer;font-size:12px;line-height:1;padding:0;}
   .plan-btn-del:hover{color:var(--danger);background:var(--danger-soft);}
   .dia-modal-item:last-child{border-bottom:none;}
@@ -765,7 +795,9 @@
           </div>
         </div>
         <div id="planCronogramaCorpo">
-          <div id="planCronogramaGrid" class="crono-grid"></div>
+          <div class="plan-crono-wrap">
+            <div id="planCronogramaGrid" class="crono-grid"></div>
+          </div>
         </div>
       </div>
 
@@ -3148,66 +3180,117 @@ function planRemoverProgresso(idx){
 }
 
 // --- Cronograma ---
+// Converte string "Disciplina (N)\nDisciplina2 (N2)" → [{d, q}]
+function parsearCelulaCreno(str){
+  if(!str || !str.trim()) return [];
+  return str.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{
+    const m = l.match(/^(.+?)\s*\((\d+)\)\s*$/);
+    return m ? {d: m[1].trim(), q: parseInt(m[2])} : {d: l, q: null};
+  });
+}
+// Converte [{d, q}] → string
+function serializarCelulaCreno(itens){
+  return itens.map(i=> i.q != null ? `${i.d} (${i.q})` : i.d).join("\n");
+}
+// Salva um array de itens na célula [si][di]
+function salvarCelulaCrenoItens(si, di, itens){
+  if(!planejamento.cronograma.celulas[si]) planejamento.cronograma.celulas[si] = new Array(7).fill("");
+  planejamento.cronograma.celulas[si][di] = serializarCelulaCreno(itens);
+  salvarPlanejamento();
+}
+
 function renderCronograma(){
   const container = document.getElementById("planCronogramaGrid");
   if(!container || !planejamento) return;
   const crono = planejamento.cronograma;
 
-  // Extrai o nome da disciplina removendo a quantidade entre parênteses no final.
-  // Ex: "Direito Tributário (20)" → "Direito Tributário"
-  function nomeDaDisciplinaLinha(linha){
-    return linha.replace(/\s*\([^)]*\)\s*$/, "").trim();
-  }
-
-  // Monta o HTML de exibição colorida de um valor de célula (pode ter múltiplas linhas).
-  function htmlExibicao(val){
-    const linhas = val.split("\n").map(l=>l.trim()).filter(Boolean);
-    if(!linhas.length)
-      return '<span style="color:var(--ink-faint);font-size:10px;font-style:italic">—</span>';
-    return linhas.map(l=>{
-      const nome = nomeDaDisciplinaLinha(l);
-      const cor = nome ? corDaDisciplina(nome) : "var(--ink-soft)";
-      return `<span style="color:${cor};display:block;font-size:10.5px;line-height:1.45;font-weight:600">${escapeHtml(l)}</span>`;
-    }).join("");
-  }
-
   container.innerHTML = DIAS_SEMANA_PLAN.map((dia, di)=>{
+    const ehFds = (di === 5 || di === 6);
     const blocos = crono.slots.map((slot, si)=>{
-      const val = (crono.celulas[si] && crono.celulas[si][di] != null)
-        ? crono.celulas[si][di] : "";
+      const val = (crono.celulas[si] && crono.celulas[si][di] != null) ? crono.celulas[si][di] : "";
+      const itens = parsearCelulaCreno(val);
+      const chips = itens.map((item, idx)=>{
+        const cor = corDaDisciplina(item.d);
+        const qtd = item.q != null ? `<span class="crono-chip-q">(${item.q})</span>` : "";
+        return `<span class="crono-chip">
+          <span style="color:${cor};font-weight:600">${escapeHtml(item.d)}</span>${qtd}
+          <button class="crono-chip-del" data-si="${si}" data-di="${di}" data-idx="${idx}" title="Remover">×</button>
+        </span>`;
+      }).join("");
       return `<div class="crono-card-bloco">
         <span class="crono-card-num">${si+1}.</span>
-        <div class="crono-bloco-display" data-si="${si}" data-di="${di}"
-             onclick="planAbrirEdicaoCreno(this)" title="Clique para editar">${htmlExibicao(val)}</div>
-        <textarea class="crono-bloco-editor hidden" data-si="${si}" data-di="${di}"
-                  rows="2" onblur="planSalvarCelulaCreno(this)">${escapeHtml(val)}</textarea>
+        <div class="crono-bloco-chips">
+          ${chips}
+          <button class="crono-add-btn" data-si="${si}" data-di="${di}" title="Adicionar disciplina">+</button>
+          <div class="crono-picker hidden" data-si="${si}" data-di="${di}">
+            <select class="crono-picker-sel"></select>
+            <input type="number" class="crono-picker-qty" min="1" placeholder="Qtd" value="30" style="width:52px">
+            <button class="crono-picker-ok" data-si="${si}" data-di="${di}">✓</button>
+            <button class="crono-picker-cancel">✕</button>
+          </div>
+        </div>
       </div>`;
     }).join("");
-    const ehFds = (di === 5 || di === 6);
     return `<div class="crono-card${ehFds ? " crono-card-fds" : ""}">
       <div class="crono-card-titulo">${dia}</div>
       ${blocos}
     </div>`;
   }).join("");
 
+  // Popula selects dos pickers com as disciplinas disponíveis
+  const discList = getAllDisciplinas();
+  container.querySelectorAll(".crono-picker-sel").forEach(sel=>{
+    sel.innerHTML = '<option value="">Selecione a disciplina...</option>'+
+      discList.map(d=>`<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join("");
+  });
+
+  // Handler: × remove chip
+  container.querySelectorAll(".crono-chip-del").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const si=parseInt(btn.dataset.si), di=parseInt(btn.dataset.di), idx=parseInt(btn.dataset.idx);
+      const itens = parsearCelulaCreno(planejamento.cronograma.celulas[si]?.[di]||"");
+      itens.splice(idx,1);
+      salvarCelulaCrenoItens(si, di, itens);
+      renderCronograma();
+    });
+  });
+
+  // Handler: + abre o picker
+  container.querySelectorAll(".crono-add-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const picker = btn.nextElementSibling;
+      picker.classList.toggle("hidden");
+      if(!picker.classList.contains("hidden")) picker.querySelector(".crono-picker-sel").focus();
+    });
+  });
+
+  // Handler: ✓ adiciona a disciplina
+  container.querySelectorAll(".crono-picker-ok").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const si=parseInt(btn.dataset.si), di=parseInt(btn.dataset.di);
+      const picker = btn.closest(".crono-picker");
+      const disc = picker.querySelector(".crono-picker-sel").value;
+      if(!disc){ alert("Selecione uma disciplina."); return; }
+      const qty = parseInt(picker.querySelector(".crono-picker-qty").value) || null;
+      const itens = parsearCelulaCreno(planejamento.cronograma.celulas[si]?.[di]||"");
+      itens.push({d: disc, q: qty});
+      salvarCelulaCrenoItens(si, di, itens);
+      renderCronograma();
+    });
+  });
+
+  // Handler: ✕ fecha o picker sem salvar
+  container.querySelectorAll(".crono-picker-cancel").forEach(btn=>{
+    btn.addEventListener("click", ()=> btn.closest(".crono-picker").classList.add("hidden"));
+  });
+
+  // Enter no select ou no campo de qty confirma
+  container.querySelectorAll(".crono-picker-qty").forEach(inp=>{
+    inp.addEventListener("keydown", e=>{ if(e.key==="Enter") inp.closest(".crono-picker").querySelector(".crono-picker-ok").click(); });
+  });
+
   document.getElementById("btnPlanAdicionarSlot").onclick = planAdicionarSlot;
   document.getElementById("btnPlanRemoverSlot").onclick = planRemoverUltimoSlot;
-}
-
-function planAbrirEdicaoCreno(displayEl){
-  const editor = displayEl.nextElementSibling;
-  displayEl.classList.add("hidden");
-  editor.classList.remove("hidden");
-  editor.focus();
-}
-
-function planSalvarCelulaCreno(editor){
-  const si = parseInt(editor.dataset.si);
-  const di = parseInt(editor.dataset.di);
-  if(!planejamento.cronograma.celulas[si]) planejamento.cronograma.celulas[si] = new Array(7).fill("");
-  planejamento.cronograma.celulas[si][di] = editor.value;
-  salvarPlanejamento();
-  renderCronograma();
 }
 
 function planAdicionarSlot(){
