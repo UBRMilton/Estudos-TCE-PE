@@ -394,7 +394,29 @@
   .resumo-topico-acoes{display:flex;gap:4px;}
   .resumo-topico-conteudo{padding:12px 16px;display:none;font-size:13px;line-height:1.65;}
   .resumo-topico-conteudo.aberto{display:block;}
-  .plan-bloco{margin-bottom:28px;}
+  /* ---- Floating toolbar (aparece ao selecionar texto) ---- */
+  .float-bar-float{
+    position:fixed;z-index:500;
+    display:flex;align-items:center;gap:2px;
+    background:var(--surface);border:1px solid var(--line);border-radius:8px;
+    padding:4px 6px;box-shadow:0 4px 18px rgba(0,0,0,.12);
+  }
+  .float-bar-float.hidden{display:none;}
+  .fb-btn{background:none;border:none;color:var(--ink-soft);font-size:12px;padding:3px 5px;border-radius:4px;cursor:pointer;line-height:1;}
+  .fb-btn:hover{background:var(--surface-2);color:var(--ink);}
+  .fb-sep{width:1px;height:14px;background:var(--line);margin:0 3px;flex-shrink:0;}
+  .fb-dot{width:13px;height:13px;border-radius:50%;border:1.5px solid rgba(0,0,0,.10);cursor:pointer;flex-shrink:0;padding:0;}
+  .fb-dot:hover{transform:scale(1.25);}
+  .fb-sq{width:13px;height:13px;border-radius:2px;border:1px solid rgba(0,0,0,.10);cursor:pointer;flex-shrink:0;padding:0;}
+  .fb-sq:hover{transform:scale(1.25);}
+  .prova-progresso{display:flex;align-items:center;gap:8px;margin-bottom:8px;max-width:400px;}
+  .prova-prog-bar{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden;}
+  .prova-prog-fill{height:100%;background:#16A34A;border-radius:3px;transition:width .3s;}
+  .prova-prog-txt{font-size:11px;color:#15803D;font-weight:600;white-space:nowrap;}
+  .plan-table tr.prova-revisada td{background:#F0FDF4;}
+  .prova-revisada-badge{font-size:9px;font-weight:700;background:#DCFCE7;color:#15803D;border:1px solid #BBF7D0;border-radius:4px;padding:1px 5px;margin-left:5px;white-space:nowrap;}
+  .prova-check-btn{width:20px;height:20px;border-radius:4px;border:1.5px solid var(--line);background:var(--surface-2);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;}
+  .prova-check-btn.revisado{background:#16A34A;border-color:#16A34A;color:#fff;}
   .plan-bloco-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px;}
   .plan-toggle-header{cursor:pointer;padding:8px 10px;margin:-8px -10px 10px;border-radius:var(--radius);user-select:none;}
   .plan-toggle-header:hover{background:var(--surface-2);}
@@ -810,15 +832,18 @@
           <button type="button" class="btn btn-primary" style="font-size:11px;padding:4px 12px;" id="btnPlanAdicionarProvaLinha">+ Matéria</button>
         </div>
         <div id="planProvaCorpo">
-          <div class="plan-table-wrap" style="max-width:360px">
+          <div id="planProvaProgresso" class="prova-progresso"></div>
+          <div class="plan-table-wrap" style="max-width:400px">
             <table class="plan-table">
               <thead><tr>
+                <th style="width:28px"></th>
                 <th style="min-width:200px">Disciplina / Matéria</th>
                 <th style="text-align:right;min-width:80px">Questões</th>
                 <th style="width:26px"></th>
               </tr></thead>
               <tbody id="planProvaTbody"></tbody>
               <tfoot><tr>
+                <td></td>
                 <td class="plan-total-label">TOTAL</td>
                 <td id="planTotalQ" style="text-align:right;font-family:var(--font-mono);font-feature-settings:'tnum' 1"></td>
                 <td></td>
@@ -831,6 +856,36 @@
     </section>
 
   </main>
+</div>
+
+<!-- ===================== FLOATING TOOLBAR ===================== -->
+<div id="floatBar" class="float-bar-float hidden">
+  <button type="button" class="fb-btn" data-fcmd="bold" title="Negrito"><b>N</b></button>
+  <button type="button" class="fb-btn" data-fcmd="italic" title="Itálico"><i>I</i></button>
+  <button type="button" class="fb-btn" data-fcmd="underline" title="Sublinhado"><u>S</u></button>
+  <span class="fb-sep"></span>
+  <button type="button" class="fb-dot" data-fcolor="#1E2A35" style="background:#1E2A35" title="Preto"></button>
+  <button type="button" class="fb-dot" data-fcolor="#DC2626" style="background:#DC2626" title="Vermelho"></button>
+  <button type="button" class="fb-dot" data-fcolor="#EA580C" style="background:#EA580C" title="Laranja"></button>
+  <button type="button" class="fb-dot" data-fcolor="#B9842A" style="background:#B9842A" title="Âmbar"></button>
+  <button type="button" class="fb-dot" data-fcolor="#16A34A" style="background:#16A34A" title="Verde"></button>
+  <button type="button" class="fb-dot" data-fcolor="#065F46" style="background:#065F46" title="Verde escuro"></button>
+  <button type="button" class="fb-dot" data-fcolor="#2563EB" style="background:#2563EB" title="Azul"></button>
+  <button type="button" class="fb-dot" data-fcolor="#1E3A5F" style="background:#1E3A5F" title="Azul marinho"></button>
+  <button type="button" class="fb-dot" data-fcolor="#7C3AED" style="background:#7C3AED" title="Roxo"></button>
+  <button type="button" class="fb-dot" data-fcolor="#DB2777" style="background:#DB2777" title="Rosa"></button>
+  <button type="button" class="fb-dot" data-fcolor="#9F1239" style="background:#9F1239" title="Vinho"></button>
+  <button type="button" class="fb-dot" data-fcolor="#92400E" style="background:#92400E" title="Marrom"></button>
+  <button type="button" class="fb-dot" data-fcolor="#5C6B78" style="background:#5C6B78" title="Cinza"></button>
+  <span class="fb-sep"></span>
+  <button type="button" class="fb-sq" data-fbg="#FEF3C7" style="background:#FEF3C7" title="Amarelo"></button>
+  <button type="button" class="fb-sq" data-fbg="#FED7AA" style="background:#FED7AA" title="Laranja claro"></button>
+  <button type="button" class="fb-sq" data-fbg="#BBF7D0" style="background:#BBF7D0" title="Verde"></button>
+  <button type="button" class="fb-sq" data-fbg="#FBCFE8" style="background:#FBCFE8" title="Rosa"></button>
+  <button type="button" class="fb-sq" data-fbg="#BFDBFE" style="background:#BFDBFE" title="Azul"></button>
+  <span class="fb-sep"></span>
+  <button type="button" class="fb-btn" id="fbBtnJuri" title="Jurisprudência">⚖</button>
+  <button type="button" class="fb-btn" id="fbBtnLiteral" title="Literalidade">§</button>
 </div>
 
 <!-- ===================== LIGHTBOX ===================== -->
@@ -2200,6 +2255,104 @@ document.getElementById("anotacaoTexto").addEventListener("paste", e=>{
   if(texto) document.execCommand("insertText", false, texto);
 });
 
+/* ========================== FLOATING TOOLBAR ========================== */
+(function(){
+  const bar = document.getElementById("floatBar");
+  const editor = document.getElementById("anotacaoTexto");
+  if(!bar || !editor) return;
+
+  // Previne perda de seleção ao clicar nos botões
+  bar.addEventListener("mousedown", e=> e.preventDefault());
+
+  function esconderBar(){ bar.classList.add("hidden"); }
+
+  function mostrarBar(){
+    const sel = window.getSelection();
+    if(!sel || sel.isCollapsed || sel.rangeCount === 0 || !editor.contains(sel.anchorNode)){
+      esconderBar(); return;
+    }
+    // Salva o range para uso pelos handlers
+    _rangeSalvo = sel.getRangeAt(0).cloneRange();
+
+    // Posiciona: mostra temporariamente para medir
+    bar.style.visibility = "hidden";
+    bar.classList.remove("hidden");
+
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    const barH = bar.offsetHeight;
+    const barW = bar.offsetWidth;
+
+    let top = rect.top - barH - 10;
+    if(top < 8) top = rect.bottom + 8; // inverte se não couber acima
+
+    let left = rect.left + rect.width / 2 - barW / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - barW - 8));
+
+    bar.style.top = top + "px";
+    bar.style.left = left + "px";
+    bar.style.visibility = "visible";
+  }
+
+  // Mostra a barra quando há seleção no editor
+  document.addEventListener("selectionchange", ()=>{
+    const sel = window.getSelection();
+    if(!sel || sel.isCollapsed || !editor.contains(sel.anchorNode)){
+      esconderBar();
+    } else {
+      setTimeout(mostrarBar, 20);
+    }
+  });
+
+  // Esconde ao clicar fora da barra e do editor
+  document.addEventListener("mousedown", e=>{
+    if(!bar.contains(e.target) && !editor.contains(e.target)) esconderBar();
+  });
+
+  document.addEventListener("keydown", e=>{
+    if(e.key === "Escape") esconderBar();
+  });
+
+  // Botões de formatação (bold/italic/underline)
+  bar.querySelectorAll(".fb-btn[data-fcmd]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      editor.focus();
+      const sel = window.getSelection();
+      if(_rangeSalvo && (!sel || sel.isCollapsed)){ sel.removeAllRanges(); sel.addRange(_rangeSalvo); }
+      try{ document.execCommand("styleWithCSS", false, true); document.execCommand(btn.dataset.fcmd); }catch(e){}
+    });
+  });
+
+  // Cores de letra
+  bar.querySelectorAll(".fb-dot").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      editor.focus();
+      const sel = window.getSelection();
+      if(_rangeSalvo && (!sel || sel.isCollapsed)){ sel.removeAllRanges(); sel.addRange(_rangeSalvo); }
+      try{ document.execCommand("styleWithCSS", false, true); document.execCommand("foreColor", false, btn.dataset.fcolor); }catch(e){}
+    });
+  });
+
+  // Marcadores de fundo
+  bar.querySelectorAll(".fb-sq").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      editor.focus();
+      const sel = window.getSelection();
+      if(_rangeSalvo && (!sel || sel.isCollapsed)){ sel.removeAllRanges(); sel.addRange(_rangeSalvo); }
+      try{ document.execCommand("hiliteColor", false, btn.dataset.fbg); }catch(e){}
+    });
+  });
+
+  // ⚖ Jurisprudência
+  document.getElementById("fbBtnJuri").addEventListener("click", ()=>{
+    document.getElementById("btnJurisprudencia").click();
+  });
+
+  // § Literalidade
+  document.getElementById("fbBtnLiteral").addEventListener("click", ()=>{
+    document.getElementById("btnLiteralidade").click();
+  });
+})();
+
 document.querySelectorAll(".rte-emoji-btn").forEach(btn=>{
   btn.addEventListener("click", ()=>{
     focarEditorComEstiloCSS();
@@ -3314,13 +3467,26 @@ function planRemoverUltimoSlot(){
 function renderProva(){
   const tbody = document.getElementById("planProvaTbody");
   if(!tbody || !planejamento) return;
+
+  const revisadas = planejamento.prova.filter(r=>r.revisado).length;
+  const total = planejamento.prova.length;
+  const pctProg = total > 0 ? (revisadas/total*100).toFixed(1) : 0;
+  const progEl = document.getElementById("planProvaProgresso");
+  if(progEl) progEl.innerHTML = total > 0 ?
+    `<div class="prova-prog-bar"><div class="prova-prog-fill" style="width:${pctProg}%"></div></div>
+     <span class="prova-prog-txt">${revisadas} / ${total} revisadas</span>` : "";
+
   tbody.innerHTML = planejamento.prova.map((row, idx)=>{
     const cor = corDaDisciplina(row.m);
-    return `<tr>
+    const rev = !!row.revisado;
+    const badge = rev ? '<span class="prova-revisada-badge">✓ revisado</span>' : "";
+    return `<tr class="${rev ? "prova-revisada" : ""}">
+      <td><button type="button" class="prova-check-btn${rev ? " revisado" : ""}"
+           onclick="toggleRevisaoProva(${idx})" title="${rev ? "Desmarcar" : "Marcar como revisado"}">${rev ? "✓" : ""}</button></td>
       <td><input class="plan-field-input" style="color:${cor};font-weight:600"
            value="${escapeHtml(row.m)}"
            data-plan="v" data-idx="${idx}" data-f="m"
-           onchange="planCelula(this)" oninput="planCelula(this)"></td>
+           onchange="planCelula(this)" oninput="planCelula(this)">${badge}</td>
       <td style="text-align:right"><input class="plan-field-input plan-num-input" type="number" min="0"
            value="${row.q}"
            data-plan="v" data-idx="${idx}" data-f="q"
@@ -3330,6 +3496,13 @@ function renderProva(){
   }).join("");
   planAtualizarTotalProva();
   document.getElementById("btnPlanAdicionarProvaLinha").onclick = planAdicionarProvaLinha;
+}
+
+function toggleRevisaoProva(idx){
+  if(!planejamento) return;
+  planejamento.prova[idx].revisado = !planejamento.prova[idx].revisado;
+  salvarPlanejamento();
+  renderProva();
 }
 
 function planAtualizarTotalProva(){
