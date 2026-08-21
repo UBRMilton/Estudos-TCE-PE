@@ -2573,7 +2573,10 @@ function renderAnotacoes(){
   const lista = (disciplina && disciplina !== "__add__")
     ? anotacoesList.filter(a=>a.disciplina === disciplina)
     : [];
+  // Preserva a posição de scroll para o usuário não perder o lugar
+  const scrollY = window.scrollY;
   renderSumarioAnotacoes(lista);
+  window.scrollTo({top: scrollY, behavior: "instant"});
 }
 
 function chaveOrdenacao(a){
@@ -2609,6 +2612,17 @@ function montarItemSumario(a){
 
 function renderSumarioAnotacoes(lista){
   const container = document.getElementById("anotacoesLista");
+
+  // Captura quais assuntos estão expandidos antes de destruir o DOM
+  const assuntosAbertos = new Set();
+  container.querySelectorAll(".assunto-toggle[aria-expanded='true']").forEach(btn=>{
+    const tituloEl = btn.querySelector(".assunto-titulo");
+    if(tituloEl) assuntosAbertos.add(tituloEl.textContent.trim());
+  });
+  // Captura também se o painel geral da disciplina está expandido
+  const painelExpandido = container.querySelector(".sumario-toggle[aria-expanded='true']") !== null
+    || container.querySelector(".sumario-toggle") === null; // se não há toggle, considera expandido
+
   container.innerHTML = "";
   if(!lista.length){
     container.innerHTML = '<p class="empty-state">Nenhuma anotação encontrada.</p>';
@@ -2708,6 +2722,14 @@ function renderSumarioAnotacoes(lista){
       btn.closest(".assunto-grupo").querySelector(".assunto-lista").classList.toggle("collapsed", expandido);
       btn.querySelector(".assunto-seta").textContent = expandido ? "▸" : "▾";
     });
+
+    // Restaura estado: se este assunto estava aberto antes, reabre automaticamente
+    const tituloEl = btn.querySelector(".assunto-titulo");
+    if(tituloEl && assuntosAbertos.has(tituloEl.textContent.trim())){
+      btn.setAttribute("aria-expanded", "true");
+      btn.querySelector(".assunto-seta").textContent = "▾";
+      btn.closest(".assunto-grupo").querySelector(".assunto-lista").classList.remove("collapsed");
+    }
   });
   container.querySelectorAll(".assunto-mover").forEach(btn=>{
     btn.addEventListener("click", e=>{
